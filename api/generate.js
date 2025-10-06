@@ -7,26 +7,32 @@
 // api/generate.js
 import { buildPolicyHTML } from './policy-template.js';
 
-// サーバーレス関数のエクスポート（ESM形式）
 export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') {
-      res.status(405).send('Method Not Allowed');
+      res.statusCode = 405;
+      res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+      res.end('Method Not Allowed');
       return;
     }
 
-    const data = await req.json ? await req.json() : await new Promise((resolve) => {
-      let body = '';
-      req.on('data', (chunk) => (body += chunk));
-      req.on('end', () => resolve(JSON.parse(body)));
-    });
+    // リクエストボディを手動で読み取り（Node環境対応）
+    let body = '';
+    for await (const chunk of req) {
+      body += chunk;
+    }
+    const data = JSON.parse(body);
 
+    // HTML生成
     const html = buildPolicyHTML(data);
+
+    res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-    res.status(200).send(html);
-  } catch (err) {
-    console.error('Error in generate.js:', err);
-    res.status(500).send('Internal Server Error');
+    res.end(html);
+  } catch (error) {
+    console.error('❌ Error in generate.js:', error);
+    res.statusCode = 500;
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.end('Internal Server Error');
   }
 }
-
