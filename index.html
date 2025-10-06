@@ -1,119 +1,330 @@
+<!--
+  index.html：入力フォーム画面。UIkitを用いてプレビューとダウンロードを提供する。
+  目的：フォーム入力 → /api/generate へJSON送信 → 受信HTMLを右ペインに表示・保存。
+  注意：入力は保存しない。実在の個人情報を入れない。代表者の例は汎用名を使用。
+-->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8" />
   <title>プライバシーポリシー生成ツール</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- UIkit CSS -->
+  <!-- UIkit CSS（UIコンポーネント用） -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/css/uikit.min.css" />
 
-  <!-- Flatpickr（カレンダーライブラリ） -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
-
-  <!-- UIkit JS -->
-  <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit-icons.min.js"></script>
-
+  <style>
+    /* 画面全体の基本レイアウト */
+    body { background: #f7f8fa; }
+    .app-wrap { max-width: 1200px; margin: 24px auto; }
+    .pill { display:inline-block; padding:4px 8px; background:#eef4ff; border:1px solid #b8c6ff; border-radius:999px; font-size:12px; margin-right:6px; }
+    .muted { color:#666; }
+    iframe#preview { width:100%; height:70vh; border:1px solid #eee; border-radius:6px; }
+  </style>
 </head>
-
 <body>
+<div class="app-wrap uk-container">
+  <h1 class="uk-heading-line"><span>🧩 Web Privacy Policy Generator（for Japan）</span></h1>
+  <p class="uk-text-small muted">入力は保存されません。生成結果は右のプレビューに表示されます。</p>
 
-<div class="uk-container uk-margin-large-top uk-width-2xlarge">
+  <div class="uk-grid-small" uk-grid>
+    <!-- 左ペイン：フォーム -->
+    <div class="uk-width-1-1 uk-width-2-5@m">
+      <!--
+        フォーム：入力値はJavaScriptでJSONへ変換し、/api/generate にPOSTする。
+        requiredは最低限のみ。カンマ区切り項目は配列へ整形。
+      -->
+      <form id="policyForm" class="uk-form-stacked uk-card uk-card-default uk-card-body uk-box-shadow-small">
+        <h3 class="uk-card-title">基本情報</h3>
+        <div class="uk-margin">
+          <label class="uk-form-label">サイト名</label>
+          <div class="uk-form-controls">
+            <input class="uk-input" name="base.siteName" placeholder="例：Example Site" required>
+          </div>
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">運営者名</label>
+          <input class="uk-input" name="base.operatorName" placeholder="例：Example Corp." required>
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">代表者名</label>
+          <!-- 実名は使わず、汎用的な例を使用する -->
+          <input class="uk-input" name="base.representative" placeholder="例：サイト運営代表者">
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">お問い合わせメール</label>
+          <input class="uk-input" name="base.contactEmail" type="email" placeholder="info@example.com" required>
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">住所</label>
+          <textarea class="uk-textarea" name="base.address" rows="2" placeholder="例：東京都〇〇区〇〇1-2-3"></textarea>
+        </div>
 
-  <h1 class="uk-heading-line"><span>プライバシーポリシー生成ツール</span></h1>
-  <p class="uk-text-meta">※入力内容は保存されません。すべてブラウザ上で処理されます。</p>
+        <hr>
 
-  <form id="policyForm" class="uk-form-stacked uk-margin-large-top">
-    
-    <!-- サイト名 -->
-    <div class="uk-margin">
-      <label class="uk-form-label" for="siteName">サイト名 <span class="uk-text-danger">*</span></label>
-      <div class="uk-form-controls">
-        <input class="uk-input" id="siteName" name="siteName" type="text" required placeholder="例：Web Privacy Guide">
+        <h3>取得方法</h3>
+        <div class="uk-margin">
+          <label class="uk-form-label">手動取得（カンマ区切り）</label>
+          <input class="uk-input" name="collection.methods" placeholder="お問い合わせフォーム, メルマガ登録">
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">自動取得（カンマ区切り）</label>
+          <input class="uk-input" name="collection.autoCollection" placeholder="Cookie, アクセスログ">
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">補足説明</label>
+          <textarea class="uk-textarea" name="collection.detail" rows="2" placeholder="例：アクセス解析のためCookieを使用します。"></textarea>
+        </div>
+
+        <hr>
+
+        <h3>利用目的 <span class="pill">＋追加可能</span></h3>
+        <div id="purposesWrap"></div>
+        <button class="uk-button uk-button-default uk-margin-small" type="button" id="addPurpose">＋ 目的を追加</button>
+
+        <hr>
+
+        <h3>第三者提供・委託</h3>
+        <div class="uk-margin">
+          <label><input class="uk-checkbox" type="checkbox" name="thirdParties.hasProvision"> 第三者提供あり</label>
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">第三者提供の説明</label>
+          <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者へ提供しません。"></textarea>
+        </div>
+        <div class="uk-margin">
+          <label><input class="uk-checkbox" type="checkbox" name="thirdParties.entrustsProcessing" checked> 委託あり</label>
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">委託先の例（カンマ区切り）</label>
+          <input class="uk-input" name="thirdParties.entrustExamples" placeholder="サーバー運営会社, 決済代行業者">
+        </div>
+
+        <hr>
+
+        <h3>アクセス解析</h3>
+        <div class="uk-margin">
+          <label><input class="uk-checkbox" type="checkbox" name="analytics.useAnalytics" checked> 利用する</label>
+        </div>
+        <div id="analyticsWrap"></div>
+        <button class="uk-button uk-button-default uk-margin-small" type="button" id="addAnalytics">＋ 解析ツールを追加</button>
+
+        <hr>
+
+        <h3>Cookie</h3>
+        <div class="uk-margin">
+          <label><input class="uk-checkbox" type="checkbox" name="cookies.useCookies" checked> Cookieを利用する</label>
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">Cookieの目的（カンマ区切り）</label>
+          <input class="uk-input" name="cookies.purposes" placeholder="利便性向上, アクセス解析, 広告配信">
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">無効化方法</label>
+          <input class="uk-input" name="cookies.disableMethod" placeholder="ブラウザ設定で無効化可能">
+        </div>
+
+        <hr>
+
+        <h3>管理体制</h3>
+        <div class="uk-margin">
+          <label class="uk-form-label">対策（カンマ区切り）</label>
+          <input class="uk-input" name="security.measures" placeholder="SSL/TLSによる通信暗号化, アクセス権限の制限, 定期的な見直しと更新">
+        </div>
+
+        <hr>
+
+        <h3>開示等の請求</h3>
+        <div class="uk-margin">
+          <label class="uk-form-label">連絡先メール</label>
+          <input class="uk-input" name="userRights.contact" placeholder="info@example.com">
+        </div>
+        <div class="uk-margin">
+          <label class="uk-form-label">手続き</label>
+          <textarea class="uk-textarea" name="userRights.procedure" rows="2" placeholder="本人確認のうえ、合理的な期間内に対応します。"></textarea>
+        </div>
+
+        <hr>
+
+        <h3>法的情報</h3>
+        <div class="uk-grid-small" uk-grid>
+          <div class="uk-width-1-2">
+            <label class="uk-form-label">発効日</label>
+            <input class="uk-input" type="date" name="legal.effectiveDate">
+          </div>
+          <div class="uk-width-1-2">
+            <label class="uk-form-label">準拠法</label>
+            <input class="uk-input" name="legal.governingLaw" placeholder="日本法" value="日本法">
+          </div>
+        </div>
+
+        <div class="uk-margin">
+          <button class="uk-button uk-button-primary" type="submit">生成する</button>
+          <button class="uk-button uk-button-default" type="button" id="downloadBtn" disabled>HTMLをダウンロード</button>
+        </div>
+      </form>
+    </div>
+
+    <!-- 右ペイン：プレビュー -->
+    <div class="uk-width-1-1 uk-width-3-5@m">
+      <div class="uk-card uk-card-default uk-card-body uk-box-shadow-small">
+        <h3 class="uk-card-title">プレビュー</h3>
+        <iframe id="preview"></iframe>
+        <p class="uk-text-small muted uk-margin-small-top">※ このプレビューは生成HTMLをそのまま表示。</p>
       </div>
     </div>
-
-    <!-- 運営者名 -->
-    <div class="uk-margin">
-      <label class="uk-form-label" for="operatorName">運営者名 <span class="uk-text-danger">*</span></label>
-      <div class="uk-form-controls">
-        <input class="uk-input" id="operatorName" name="operatorName" type="text" required placeholder="例：株式会社まったり（山田花子／マッタリデザインスタジオ）">
-      </div>
-    </div>
-
-    <!-- メールアドレス -->
-    <div class="uk-margin">
-      <label class="uk-form-label" for="contactEmail">連絡先メールアドレス <span class="uk-text-danger">*</span></label>
-      <div class="uk-form-controls">
-        <input class="uk-input" id="contactEmail" name="contactEmail" type="email" required placeholder="例：info@amarga.jp">
-      </div>
-    </div>
-
-    <!-- 発効日 -->
-    <div class="uk-margin">
-      <label class="uk-form-label" for="startDate">ポリシー発効日 <span class="uk-text-danger">*</span></label>
-      <div class="uk-form-controls">
-        <input class="uk-input" id="startDate" name="startDate" type="text" required placeholder="クリックして選択">
-      </div>
-    </div>
-
-    <!-- 送信ボタン -->
-    <div class="uk-margin">
-      <button class="uk-button uk-button-primary" type="submit">ポリシーを生成</button>
-    </div>
-  </form>
-
-  <!-- 結果表示エリア -->
-  <div id="result" class="uk-margin-large-top uk-card uk-card-default uk-card-body" hidden>
-    <h3>生成結果</h3>
-    <div id="policyOutput" class="uk-margin"></div>
   </div>
-
 </div>
 
-<!-- JavaScript：Flatpickr初期化 & フォーム送信処理 -->
-<script>
-  // Flatpickrを日本語で初期化
-  flatpickr("#startDate", {
-    locale: "ja",
-    dateFormat: "Y年m月d日",
-    defaultDate: new Date()
-  });
+<!-- UIkit JS（UI動作用） -->
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit-icons.min.js"></script>
 
-  // 日付を「YYYY年M月D日」形式に変換
-  function formatJapaneseDate(dateStr) {
-    const date = new Date(dateStr);
-    if (isNaN(date)) return dateStr;
-    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+<script>
+/*
+  このスクリプトの役割：
+  1) 「利用目的」「解析ツール」の行を動的に追加
+  2) フォーム値をJSONへ整形
+  3) /api/generate にPOSTし、返却HTMLをiframeへ描画
+  4) 同じHTMLをBlobとしてダウンロード可能にする
+*/
+(function(){
+  const $ = sel => document.querySelector(sel);
+  const createEl = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; };
+
+  // --- 利用目的の動的行 ---
+  const purposesWrap = $('#purposesWrap');
+  const addPurposeRow = (c="", t="", d="") => {
+    purposesWrap.appendChild(createEl(`
+      <div class="uk-grid-small uk-margin-small" uk-grid>
+        <div class="uk-width-1-3"><input class="uk-input" placeholder="カテゴリ" data-k="category" value="${c}"></div>
+        <div class="uk-width-1-3"><input class="uk-input" placeholder="対象" data-k="target" value="${t}"></div>
+        <div class="uk-width-1-3"><input class="uk-input" placeholder="説明" data-k="description" value="${d}"></div>
+      </div>
+    `));
+  };
+  $('#addPurpose').addEventListener('click', () => addPurposeRow());
+  // 初期1行
+  addPurposeRow("サービス提供","利用者","お問い合わせへの回答および依頼対応");
+
+  // --- アクセス解析の動的行 ---
+  const analyticsWrap = $('#analyticsWrap');
+  const addAnalyticsRow = (name="", provider="", purpose="", optout="") => {
+    analyticsWrap.appendChild(createEl(`
+      <div class="uk-margin-small uk-grid-small" uk-grid>
+        <div class="uk-width-1-4"><input class="uk-input" placeholder="ツール名" data-k="name" value="${name}"></div>
+        <div class="uk-width-1-4"><input class="uk-input" placeholder="提供者" data-k="provider" value="${provider}"></div>
+        <div class="uk-width-1-4"><input class="uk-input" placeholder="目的" data-k="purpose" value="${purpose}"></div>
+        <div class="uk-width-1-4"><input class="uk-input" placeholder="オプトアウトURL" data-k="optoutUrl" value="${optout}"></div>
+      </div>
+    `));
+  };
+  $('#addAnalytics').addEventListener('click', () => addAnalyticsRow());
+  // 初期例
+  addAnalyticsRow("Google Analytics","Google LLC","サイト利用状況の分析","https://tools.google.com/dlpage/gaoptout");
+
+  // 文字列→配列（カンマ区切りを分割）
+  const toList = (str) => (str||"").split(",").map(s=>s.trim()).filter(Boolean);
+
+  // --- フォーム値をJSONへまとめる ---
+  function formToJSON(form){
+    const get = name => form.querySelector(`[name="${name}"]`);
+    const getVal = name => (get(name)?.value || "").trim();
+    const getBool = name => !!get(name)?.checked;
+
+    // 利用目的（動的行）
+    const pv = [...purposesWrap.querySelectorAll('.uk-grid-small')].map(row=>{
+      const g = k => row.querySelector(`[data-k="${k}"]`)?.value.trim() || "";
+      if(!g('category') && !g('target') && !g('description')) return null;
+      return { category:g('category'), target:g('target'), description:g('description') };
+    }).filter(Boolean);
+
+    // アクセス解析ツール（動的行）
+    const tools = [...analyticsWrap.querySelectorAll('.uk-grid-small')].map(row=>{
+      const g = k => row.querySelector(`[data-k="${k}"]`)?.value.trim() || "";
+      if(!g('name')) return null;
+      return { name:g('name'), provider:g('provider'), purpose:g('purpose'), optoutUrl:g('optoutUrl') };
+    }).filter(Boolean);
+
+    return {
+      base: {
+        siteName: getVal('base.siteName'),
+        operatorName: getVal('base.operatorName'),
+        contactEmail: getVal('base.contactEmail'),
+        address: getVal('base.address'),
+        representative: getVal('base.representative')
+      },
+      collection: {
+        methods: toList(getVal('collection.methods')),
+        autoCollection: toList(getVal('collection.autoCollection')),
+        detail: getVal('collection.detail')
+      },
+      purposes: pv,
+      thirdParties: {
+        hasProvision: getBool('thirdParties.hasProvision'),
+        detail: getVal('thirdParties.detail') || "法令に基づく場合を除き、第三者へ提供しません。",
+        entrustsProcessing: getBool('thirdParties.entrustsProcessing'),
+        entrustExamples: toList(getVal('thirdParties.entrustExamples'))
+      },
+      analytics: {
+        useAnalytics: getBool('analytics.useAnalytics'),
+        tools
+      },
+      cookies: {
+        useCookies: getBool('cookies.useCookies'),
+        purposes: toList(getVal('cookies.purposes')),
+        disableMethod: getVal('cookies.disableMethod') || "ブラウザ設定で無効化可能"
+      },
+      security: {
+        measures: toList(getVal('security.measures'))
+      },
+      userRights: {
+        contact: getVal('userRights.contact') || getVal('base.contactEmail'),
+        procedure: getVal('userRights.procedure') || "本人確認のうえ、合理的な期間内に対応します。"
+      },
+      legal: {
+        effectiveDate: getVal('legal.effectiveDate') || new Date().toISOString().slice(0,10),
+        governingLaw: getVal('legal.governingLaw') || "日本法"
+      }
+    };
   }
 
-  // フォーム送信
-  document.getElementById('policyForm').addEventListener('submit', async (e) => {
+  // --- 送信処理：/api/generate へPOSTし、プレビューとDLを準備 ---
+  const preview = $('#preview');
+  const dlBtn = $('#downloadBtn');
+
+  $('#policyForm').addEventListener('submit', async (e)=>{
     e.preventDefault();
+    dlBtn.disabled = true;
 
-    const rawDate = document.getElementById('startDate').value;
+    const json = formToJSON(e.currentTarget);
 
-    const formData = {
-      siteName: document.getElementById('siteName').value,
-      operatorName: document.getElementById('operatorName').value,
-      contactEmail: document.getElementById('contactEmail').value,
-      startDate: formatJapaneseDate(rawDate)
-    };
-
+    // API呼び出し（/api/generate へJSONを送信）
     const res = await fetch('/api/generate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(formData)
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(json)
     });
 
-    const text = await res.text();
-    document.getElementById('policyOutput').innerHTML = text;
-    document.getElementById('result').hidden = false;
-  });
-</script>
+    // 返却HTMLを受け取る
+    const html = await res.text();
 
+    // プレビューへ描画（iframeに直接HTMLを書き込む）
+    const doc = preview.contentDocument || preview.contentWindow.document;
+    doc.open(); doc.write(html); doc.close();
+
+    // ダウンロードボタンの有効化（Blobにして保存）
+    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    dlBtn.disabled = false;
+    dlBtn.onclick = () => {
+      const a = document.createElement('a');
+      a.href = url; a.download = 'privacy-policy.html';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(()=> URL.revokeObjectURL(url), 1500);
+    };
+  });
+})();
+</script>
 </body>
 </html>
