@@ -7,7 +7,7 @@
 // 各セクションテンプレートを統合してHTMLを生成するモジュール
 
 // フル相対パスで指定（Node ESMでは重要）
-import { SECTION_RULES } from "../config/sections.js";
+import { SECTION_RULES } from "./config/sections.js";
 
 // Nodeのファイルシステム等は不要（サーバーレス内で完結）
 export async function buildPolicyHTML(data) {
