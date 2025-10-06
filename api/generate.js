@@ -4,29 +4,29 @@
 // 注意：入力データは保存・ログ出力しない。即時レスポンスのみ。
 // ================================================
 
+// api/generate.js
 import { buildPolicyHTML } from './policy-template.js';
 
+// サーバーレス関数のエクスポート（ESM形式）
 export default async function handler(req, res) {
   try {
-    // POST以外のリクエストは拒否
     if (req.method !== 'POST') {
       res.status(405).send('Method Not Allowed');
       return;
     }
 
-    // クライアントから送信されたJSONデータを取得
-    const data = req.body;
+    const data = await req.json ? await req.json() : await new Promise((resolve) => {
+      let body = '';
+      req.on('data', (chunk) => (body += chunk));
+      req.on('end', () => resolve(JSON.parse(body)));
+    });
 
-    // テンプレート結合処理を実行（policy-template.js でHTML生成）
-    const html = await buildPolicyHTML(data);
-
-    // 成功時はHTML文字列を返す
+    const html = buildPolicyHTML(data);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.status(200).send(html);
-
   } catch (err) {
-    // エラーハンドリング
-    console.error('Error generating policy:', err);
+    console.error('Error in generate.js:', err);
     res.status(500).send('Internal Server Error');
   }
 }
+
