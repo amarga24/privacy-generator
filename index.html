@@ -2,37 +2,118 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
-  <title>プライバシーポリシー生成ツール</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>プライバシーポリシー生成ツール</title>
+
   <!-- UIkit CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/css/uikit.min.css" />
+
+  <!-- Flatpickr（カレンダーライブラリ） -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ja.js"></script>
+
   <!-- UIkit JS -->
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit-icons.min.js"></script>
+
 </head>
+
 <body>
 
 <div class="uk-container uk-margin-large-top uk-width-2xlarge">
+
   <h1 class="uk-heading-line"><span>プライバシーポリシー生成ツール</span></h1>
+  <p class="uk-text-meta">※入力内容は保存されません。すべてブラウザ上で処理されます。</p>
 
-  <form class="uk-form-stacked">
+  <form id="policyForm" class="uk-form-stacked uk-margin-large-top">
+    
+    <!-- サイト名 -->
     <div class="uk-margin">
-      <label class="uk-form-label">サイト名</label>
+      <label class="uk-form-label" for="siteName">サイト名 <span class="uk-text-danger">*</span></label>
       <div class="uk-form-controls">
-        <input class="uk-input" type="text" placeholder="honyanyara.com">
+        <input class="uk-input" id="siteName" name="siteName" type="text" required placeholder="例：Web Privacy Guide">
       </div>
     </div>
 
+    <!-- 運営者名 -->
     <div class="uk-margin">
-      <label class="uk-form-label">運営者名</label>
+      <label class="uk-form-label" for="operatorName">運営者名 <span class="uk-text-danger">*</span></label>
       <div class="uk-form-controls">
-        <input class="uk-input" type="text" placeholder="ほにゃらら本舗">
+        <input class="uk-input" id="operatorName" name="operatorName" type="text" required placeholder="例：株式会社まったり（山田花子／マッタリデザインスタジオ）">
       </div>
     </div>
 
-    <button class="uk-button uk-button-primary">生成する</button>
+    <!-- メールアドレス -->
+    <div class="uk-margin">
+      <label class="uk-form-label" for="contactEmail">連絡先メールアドレス <span class="uk-text-danger">*</span></label>
+      <div class="uk-form-controls">
+        <input class="uk-input" id="contactEmail" name="contactEmail" type="email" required placeholder="例：info@amarga.jp">
+      </div>
+    </div>
+
+    <!-- 発効日 -->
+    <div class="uk-margin">
+      <label class="uk-form-label" for="startDate">ポリシー発効日 <span class="uk-text-danger">*</span></label>
+      <div class="uk-form-controls">
+        <input class="uk-input" id="startDate" name="startDate" type="text" required placeholder="クリックして選択">
+      </div>
+    </div>
+
+    <!-- 送信ボタン -->
+    <div class="uk-margin">
+      <button class="uk-button uk-button-primary" type="submit">ポリシーを生成</button>
+    </div>
   </form>
+
+  <!-- 結果表示エリア -->
+  <div id="result" class="uk-margin-large-top uk-card uk-card-default uk-card-body" hidden>
+    <h3>生成結果</h3>
+    <div id="policyOutput" class="uk-margin"></div>
+  </div>
+
 </div>
+
+<!-- JavaScript：Flatpickr初期化 & フォーム送信処理 -->
+<script>
+  // Flatpickrを日本語で初期化
+  flatpickr("#startDate", {
+    locale: "ja",
+    dateFormat: "Y年m月d日",
+    defaultDate: new Date()
+  });
+
+  // 日付を「YYYY年M月D日」形式に変換
+  function formatJapaneseDate(dateStr) {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return dateStr;
+    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+  }
+
+  // フォーム送信
+  document.getElementById('policyForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    const rawDate = document.getElementById('startDate').value;
+
+    const formData = {
+      siteName: document.getElementById('siteName').value,
+      operatorName: document.getElementById('operatorName').value,
+      contactEmail: document.getElementById('contactEmail').value,
+      startDate: formatJapaneseDate(rawDate)
+    };
+
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData)
+    });
+
+    const text = await res.text();
+    document.getElementById('policyOutput').innerHTML = text;
+    document.getElementById('result').hidden = false;
+  });
+</script>
 
 </body>
 </html>
