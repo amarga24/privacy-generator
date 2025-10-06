@@ -5,6 +5,7 @@
 // ================================================
 
 // api/generate.js
+// api/generate.js
 import { buildPolicyHTML } from './policy-template.js';
 
 export default async function handler(req, res) {
@@ -16,15 +17,15 @@ export default async function handler(req, res) {
       return;
     }
 
-    // リクエストボディを手動で読み取り（Node環境対応）
+    // リクエストボディを読み取る
     let body = '';
     for await (const chunk of req) {
       body += chunk;
     }
     const data = JSON.parse(body);
 
-    // HTML生成
-    const html = buildPolicyHTML(data);
+    // ✅ buildPolicyHTML が Promise を返す可能性に対応
+    const html = await buildPolicyHTML(data);
 
     res.statusCode = 200;
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -36,3 +37,4 @@ export default async function handler(req, res) {
     res.end('Internal Server Error');
   }
 }
+
