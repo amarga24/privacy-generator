@@ -45,7 +45,6 @@
   $("#addPurpose").addEventListener("click", addPurposeRow);
   addPurposeRow(); // 初期行
 
-
   // ------------------------------------------------------------
   // アクセス解析フォームの動的追加
   // ------------------------------------------------------------
@@ -77,7 +76,6 @@
   $("#addAnalytics").addEventListener("click", addAnalyticsRow);
   addAnalyticsRow(); // 初期行
 
-
   // ------------------------------------------------------------
   // 入力補助関数
   // ------------------------------------------------------------
@@ -87,6 +85,51 @@
   const getBool = (form, n) => !!get(form, n)?.checked;
   const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
 
+  // ------------------------------------------------------------
+  // 「該当なし」チェックと入力無効化の連動制御
+  // ------------------------------------------------------------
+  const noCheckPairs = [
+    { check: "collection.noCollection",   sectionId: null, wrapper: "collection" },
+    { check: "purposes.noPurpose",        sectionId: "purposesWrap" },
+    { check: "thirdParties.noThirdparty", sectionId: null, wrapper: "thirdParties" },
+    { check: "analytics.noAnalytics",     sectionId: "analyticsWrap" },
+    { check: "cookies.noCookies",         sectionId: null, wrapper: "cookies" }
+  ];
+
+  // 全チェックボックスを未チェック状態で初期化
+  noCheckPairs.forEach(p => {
+    const cb = document.querySelector(`[name="${p.check}"]`);
+    if (cb) cb.checked = false;
+  });
+
+  // 共通制御関数
+  const toggleSectionInputs = (sectionRoot, disabled) => {
+    if (!sectionRoot) return;
+    sectionRoot.querySelectorAll("input, textarea, select, button").forEach(el => {
+      if (el.type === "checkbox" && el.name.includes("no")) return;
+      el.disabled = disabled;
+    });
+  };
+
+  // 各チェックボックスごとの制御イベント
+  noCheckPairs.forEach(p => {
+    const cb = document.querySelector(`[name="${p.check}"]`);
+    let section = null;
+
+    // 明示的にIDがある場合
+    if (p.sectionId) {
+      section = document.getElementById(p.sectionId);
+    } else if (p.wrapper) {
+      // 名前のprefixを元に範囲を探す
+      const ref = document.querySelector(`[name^="${p.wrapper}."]`);
+      if (ref) {
+        section = ref.closest("hr")?.previousElementSibling?.parentElement || ref.closest("form");
+      }
+    }
+
+    if (!cb || !section) return;
+    cb.addEventListener("change", () => toggleSectionInputs(section, cb.checked));
+  });
 
   // ------------------------------------------------------------
   // フォームデータ → JSON変換
@@ -149,7 +192,6 @@
       }
     };
   };
-
 
   // ------------------------------------------------------------
   // HTMLプレビュー生成とダウンロード機能
