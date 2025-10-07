@@ -8,11 +8,9 @@
 
 import { buildPolicyHTML } from "./policy-template.js";
 
-// ------------------------------------------------------------
-// メインハンドラ（Vercel サーバーレス関数）
-// ------------------------------------------------------------
 export default async function handler(req, res) {
   try {
+    // POSTメソッド以外を拒否
     if (req.method !== "POST") {
       res.statusCode = 405;
       res.setHeader("Content-Type", "text/plain; charset=utf-8");
@@ -20,14 +18,13 @@ export default async function handler(req, res) {
       return;
     }
 
-    // -----------------------------------------
-    // 1. リクエストボディの読み取り
-    // -----------------------------------------
+    // リクエストボディの読み取り
     let body = "";
     for await (const chunk of req) {
       body += chunk;
     }
 
+    // JSON解析
     let data;
     try {
       data = JSON.parse(body);
@@ -39,30 +36,36 @@ export default async function handler(req, res) {
     }
 
     // -----------------------------------------
-    // 2. 型安全処理（非文字列を文字列化）
+    // 型安全にデータを整形
     // -----------------------------------------
+    function sanitizeValue(value) {
+      if (Array.isArray(value)) {
+        return value.map(v => String(v).trim()).join(", ");
+      }
+      if (typeof value === "object" && value !== null) {
+        return JSON.stringify(value);
+      }
+      if (typeof value === "string") {
+        return value.trim();
+      }
+      if (value == null || value === undefined) {
+        return "";
+      }
+      return String(value);
+    }
+
     const sanitizedData = {};
     for (const [key, value] of Object.entries(data)) {
-      if (Array.isArray(value)) {
-        sanitizedData[key] = value.map(v => String(v).trim()).join(", ");
-      } else if (typeof value === "object" && value !== null) {
-        sanitizedData[key] = JSON.stringify(value);
-      } else if (typeof value === "string") {
-        sanitizedData[key] = value.trim();
-      } else if (value == null || value === undefined) {
-        sanitizedData[key] = "";
-      } else {
-        sanitizedData[key] = String(value);
-      }
+      sanitizedData[key] = sanitizeValue(value);
     }
 
     // -----------------------------------------
-    // 3. HTML生成処理
+    // HTML生成
     // -----------------------------------------
     const html = buildPolicyHTML(sanitizedData);
 
     // -----------------------------------------
-    // 4. レスポンス返却
+    // レスポンス返却
     // -----------------------------------------
     res.statusCode = 200;
     res.setHeader("Content-Type", "text/html; charset=utf-8");
