@@ -86,23 +86,21 @@
   const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
 
   // ------------------------------------------------------------
-  // 「該当なし」チェックと入力無効化の連動制御
+  // 「該当なし」チェックと入力無効化の連動制御（対象3セクション）
   // ------------------------------------------------------------
   const noCheckPairs = [
-    { check: "collection.noCollection", sectionId: null, wrapper: "collection" },
-    { check: "purposes.noPurpose", sectionId: "purposesWrap" },
-    { check: "thirdParties.noThirdparty", sectionId: null, wrapper: "thirdParties" },
-    { check: "analytics.noAnalytics", sectionId: "analyticsWrap" },
-    { check: "cookies.noCookies", sectionId: null, wrapper: "cookies" }
+    { check: "collection.noCollection", sectionId: "collectionSection" }, // 個人情報の取得方法
+    { check: "thirdParties.noThirdparty", sectionId: "thirdPartiesSection" }, // 第三者提供・委託
+    { check: "cookies.noCookies", sectionId: "cookiesSection" } // Cookie
   ];
 
-  // 全チェックボックスを未チェック状態で初期化
+  // 初期化（すべて未チェックに）
   noCheckPairs.forEach(p => {
     const cb = document.querySelector(`[name="${p.check}"]`);
     if (cb) cb.checked = false;
   });
 
-  // 共通制御関数
+  // 共通の制御関数
   const toggleSectionInputs = (sectionRoot, disabled) => {
     if (!sectionRoot) return;
     sectionRoot.querySelectorAll("input, textarea, select, button").forEach(el => {
@@ -111,19 +109,10 @@
     });
   };
 
-  // 各チェックボックスごとの制御イベント
+  // 各セクションでチェック連動
   noCheckPairs.forEach(p => {
     const cb = document.querySelector(`[name="${p.check}"]`);
-    let section = null;
-
-    if (p.sectionId) {
-      // 直接IDで指定されている場合（purposesWrap, analyticsWrap）
-      section = document.getElementById(p.sectionId);
-    } else if (cb) {
-      // 「該当なし」チェックボックスの親セクション（見出し〜次のhrまで）を特定
-      section = cb.closest(".uk-section-xsmall, .uk-fieldset, .uk-margin");
-    }
-
+    const section = document.getElementById(p.sectionId);
     if (!cb || !section) return;
 
     cb.addEventListener("change", () => {
