@@ -89,11 +89,11 @@
   // 「該当なし」チェックと入力無効化の連動制御
   // ------------------------------------------------------------
   const noCheckPairs = [
-    { check: "collection.noCollection",   sectionId: null, wrapper: "collection" },
-    { check: "purposes.noPurpose",        sectionId: "purposesWrap" },
+    { check: "collection.noCollection", sectionId: null, wrapper: "collection" },
+    { check: "purposes.noPurpose", sectionId: "purposesWrap" },
     { check: "thirdParties.noThirdparty", sectionId: null, wrapper: "thirdParties" },
-    { check: "analytics.noAnalytics",     sectionId: "analyticsWrap" },
-    { check: "cookies.noCookies",         sectionId: null, wrapper: "cookies" }
+    { check: "analytics.noAnalytics", sectionId: "analyticsWrap" },
+    { check: "cookies.noCookies", sectionId: null, wrapper: "cookies" }
   ];
 
   // 全チェックボックスを未チェック状態で初期化
@@ -116,19 +116,19 @@
     const cb = document.querySelector(`[name="${p.check}"]`);
     let section = null;
 
-    // 明示的にIDがある場合
     if (p.sectionId) {
+      // 直接IDで指定されている場合（purposesWrap, analyticsWrap）
       section = document.getElementById(p.sectionId);
-    } else if (p.wrapper) {
-      // 名前のprefixを元に範囲を探す
-      const ref = document.querySelector(`[name^="${p.wrapper}."]`);
-      if (ref) {
-        section = ref.closest("hr")?.previousElementSibling?.parentElement || ref.closest("form");
-      }
+    } else if (cb) {
+      // 「該当なし」チェックボックスの親セクション（見出し〜次のhrまで）を特定
+      section = cb.closest(".uk-section-xsmall, .uk-fieldset, .uk-margin");
     }
 
     if (!cb || !section) return;
-    cb.addEventListener("change", () => toggleSectionInputs(section, cb.checked));
+
+    cb.addEventListener("change", () => {
+      toggleSectionInputs(section, cb.checked);
+    });
   });
 
   // ------------------------------------------------------------
