@@ -14,73 +14,52 @@
       background: #f8f9fb;
     }
 
-    .app-wrap {
-      padding: 32px 16px;
-    }
-
     .required-label {
       color: #e60033;
-      font-size: .8em;
+      font-size: 0.8em;
       margin-left: 4px;
-    }
-
-    .section-desc {
-      color: #666;
-      font-size: .9em;
-      margin-top: -4px;
-      margin-bottom: 12px;
     }
 
     ::placeholder {
       color: #999;
-    }
-
-    .icon-heading {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      line-height: 1.3;
-      margin-top: 32px;
-    }
-
-    .icon-heading [uk-icon] svg {
-      vertical-align: middle;
-      position: relative;
-      top: -1px;
     }
   </style>
 </head>
 
 <body>
 
-  <div class="uk-container app-wrap">
-    <h1 class="uk-heading-divider">Web Privacy Policy Generator</h1>
+  <div class="uk-container uk-margin-large-top uk-margin-large-bottom">
+    <h1 class="uk-heading-line"><span>Web Privacy Policy Generator</span></h1>
     <p class="uk-text-small uk-text-muted">
       入力内容は保存されません。「生成する」を押すと下部にHTMLがプレビューされます。
     </p>
 
-    <form id="policyForm" class="uk-form-stacked uk-card uk-card-default uk-card-body uk-box-shadow-small">
+    <form id="policyForm" class="uk-form-stacked uk-card uk-card-default uk-card-body uk-margin">
 
       <!-- 基本情報 -->
-      <h3 class="icon-heading"><span uk-icon="user" ratio="1.2"></span> 基本情報</h3>
-      <p class="section-desc">サイトや運営者の基本情報を入力してください。</p>
+      <h3 class="uk-heading-bullet"><span uk-icon="user"></span> 基本情報</h3>
+      <p class="uk-text-meta">サイトや運営者の基本情報を入力してください。</p>
+
       <div class="uk-margin">
         <label class="uk-form-label">サイト名 <span class="required-label">※必須</span></label>
         <input class="uk-input" name="base.siteName" placeholder="Web Privacy Guide" required>
       </div>
+
       <div class="uk-margin">
         <label class="uk-form-label">運営者名 <span class="required-label">※必須</span></label>
         <input class="uk-input" name="base.operatorName" placeholder="株式会社サンプル" required>
       </div>
+
       <div class="uk-margin">
         <label class="uk-form-label">代表者名</label>
         <input class="uk-input" name="base.representative" placeholder="代表取締役 山田太郎">
       </div>
+
       <div class="uk-margin">
         <label class="uk-form-label">お問い合わせメール <span class="required-label">※必須</span></label>
         <input class="uk-input" type="email" name="base.contactEmail" placeholder="info@sample-desu.co.jp" required>
       </div>
+
       <div class="uk-margin">
         <label class="uk-form-label">住所</label>
         <textarea class="uk-textarea" name="base.address" rows="2" placeholder="東京都港区赤坂1-1-1"></textarea>
@@ -90,28 +69,26 @@
 
       <!-- 個人情報の取得方法 -->
       <section id="collectionSection">
-        <h3 class="icon-heading"><span uk-icon="lock" ratio="1.2"></span> 個人情報の取得方法</h3>
-        <p class="section-desc">
-          問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
-          各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
-        </p>
-        <div class="uk-margin">
+        <h3 class="uk-heading-bullet"><span uk-icon="lock"></span> 個人情報の取得方法</h3>
+        <p class="uk-text-meta">問い合わせフォーム等を使用しない場合は「該当なし」をチェックしてください。</p>
+
+        <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="collection.noCollection"> 該当なし</label>
         </div>
-        <hr class="uk-divider-small">
-        <p class="section-desc">どのような方法で個人情報を取得しているかを入力してください。</p>
+
         <div class="uk-margin">
           <label class="uk-form-label">ユーザー入力による取得</label>
           <input class="uk-input" name="collection.methods" placeholder="お問い合わせフォーム, 会員登録フォーム">
         </div>
+
         <div class="uk-margin">
           <label class="uk-form-label">自動取得される情報</label>
           <input class="uk-input" name="collection.autoCollection" placeholder="アクセスログ, Cookie, IPアドレス">
         </div>
+
         <div class="uk-margin">
           <label class="uk-form-label">補足説明</label>
-          <textarea class="uk-textarea" name="collection.detail" rows="2"
-            placeholder="利用状況分析のためCookieを使用しています。"></textarea>
+          <textarea class="uk-textarea" name="collection.detail" rows="2" placeholder="利用状況分析のためCookieを使用しています。"></textarea>
         </div>
       </section>
 
@@ -119,16 +96,13 @@
 
       <!-- 利用目的 -->
       <section id="purposesSection">
-        <h3 class="icon-heading"><span uk-icon="list" ratio="1.2"></span> 利用目的</h3>
-        <p class="section-desc">
-          問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
-          各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
-        </p>
-        <div class="uk-margin">
+        <h3 class="uk-heading-bullet"><span uk-icon="list"></span> 利用目的</h3>
+        <p class="uk-text-meta">利用目的が存在しない場合は「該当なし」をチェックしてください。</p>
+
+        <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="purposes.noPurpose"> 該当なし</label>
         </div>
-        <hr class="uk-divider-small">
-        <p class="section-desc">取得した情報をどのように利用するかを入力してください。</p>
+
         <p class="uk-text-meta">例：株式会社サンプルは、お客様情報を商品発送およびお問い合わせ対応のために利用します。</p>
         <div id="purposesWrap"></div>
         <button class="uk-button uk-button-default uk-margin-small" type="button" id="addPurpose">＋ 目的を追加</button>
@@ -138,29 +112,26 @@
 
       <!-- 第三者提供・委託 -->
       <section id="thirdPartiesSection">
-        <h3 class="icon-heading"><span uk-icon="users" ratio="1.2"></span> 第三者提供・委託</h3>
-        <p class="section-desc">
-          問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
-          各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
-        </p>
-        <div class="uk-margin">
+        <h3 class="uk-heading-bullet"><span uk-icon="users"></span> 第三者提供・委託</h3>
+        <p class="uk-text-meta">提供や委託がない場合は「該当なし」をチェックしてください。</p>
+
+        <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="thirdParties.noThirdparty"> 該当なし</label>
         </div>
-        <hr class="uk-divider-small">
-        <p class="section-desc">個人情報を第三者に提供または外部に委託する場合に入力してください。</p>
-        <div class="uk-margin">
+
+        <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="thirdParties.hasProvision"> 第三者提供あり</label>
         </div>
+
         <div class="uk-margin">
-          <label class="uk-form-label">第三者提供の説明</label>
-          <textarea class="uk-textarea" name="thirdParties.detail" rows="2"
-            placeholder="法令に基づく場合を除き、第三者へ提供しません。"></textarea>
+          <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者へ提供しません。"></textarea>
         </div>
-        <div class="uk-margin">
+
+        <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="thirdParties.entrustsProcessing"> 委託あり</label>
         </div>
+
         <div class="uk-margin">
-          <label class="uk-form-label">委託先の例</label>
           <input class="uk-input" name="thirdParties.entrustExamples" placeholder="サーバー会社, 決済代行業者">
         </div>
       </section>
@@ -169,19 +140,17 @@
 
       <!-- アクセス解析 -->
       <section id="analyticsSection">
-        <h3 class="icon-heading"><span uk-icon="search" ratio="1.2"></span> アクセス解析</h3>
-        <p class="section-desc">
-          問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
-          各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
-        </p>
-        <div class="uk-margin">
+        <h3 class="uk-heading-bullet"><span uk-icon="search"></span> アクセス解析</h3>
+        <p class="uk-text-meta">アクセス解析を使用しない場合は「該当なし」をチェックしてください。</p>
+
+        <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="analytics.noAnalytics"> 該当なし</label>
         </div>
-        <hr class="uk-divider-small">
-        <p class="section-desc">利用しているアクセス解析ツールを入力してください。</p>
-        <div class="uk-margin">
+
+        <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="analytics.useAnalytics"> 利用する</label>
         </div>
+
         <div id="analyticsWrap"></div>
         <button class="uk-button uk-button-default uk-margin-small" type="button" id="addAnalytics">＋ 解析ツールを追加</button>
       </section>
@@ -190,20 +159,18 @@
 
       <!-- Cookie -->
       <section id="cookiesSection">
-        <h3 class="icon-heading"><span uk-icon="database" ratio="1.2"></span> Cookie</h3>
-        <p class="section-desc">
-          問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
-          各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
-        </p>
-        <div class="uk-margin">
+        <h3 class="uk-heading-bullet"><span uk-icon="database"></span> Cookie</h3>
+        <p class="uk-text-meta">Cookieを使用しない場合は「該当なし」をチェックしてください。</p>
+
+        <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="cookies.noCookies"> 該当なし</label>
         </div>
-        <hr class="uk-divider-small">
-        <p class="section-desc">Cookieの使用目的や無効化方法を入力してください。</p>
+
         <div class="uk-margin">
           <label class="uk-form-label">使用目的</label>
           <input class="uk-input" name="cookies.purposes" placeholder="利便性向上, アクセス解析, 広告配信">
         </div>
+
         <div class="uk-margin">
           <label class="uk-form-label">無効化方法</label>
           <input class="uk-input" name="cookies.disableMethod" placeholder="ブラウザ設定からCookieを無効化できます。">
@@ -213,8 +180,8 @@
       <hr>
 
       <!-- 管理体制 -->
-      <h3 class="icon-heading"><span uk-icon="bell" ratio="1.2"></span> 管理体制</h3>
-      <p class="section-desc">個人情報保護のために講じている対策を入力してください。</p>
+      <h3 class="uk-heading-bullet"><span uk-icon="bell"></span> 管理体制</h3>
+      <p class="uk-text-meta">個人情報保護のために講じている対策を入力してください。</p>
       <div class="uk-margin">
         <input class="uk-input" name="security.measures" placeholder="SSL/TLS通信暗号化, アクセス制御, 定期的な見直し">
       </div>
@@ -222,33 +189,32 @@
       <hr>
 
       <!-- 開示等の請求 -->
-      <h3 class="icon-heading"><span uk-icon="mail" ratio="1.2"></span> 開示等の請求</h3>
-      <p class="section-desc">開示・訂正・削除などの請求連絡先を入力してください。</p>
+      <h3 class="uk-heading-bullet"><span uk-icon="mail"></span> 開示等の請求</h3>
+      <p class="uk-text-meta">開示・訂正・削除などの請求連絡先を入力してください。</p>
+
       <div class="uk-margin">
-        <label class="uk-form-label">連絡先メール</label>
         <input class="uk-input" name="userRights.contact" placeholder="info@sample-desu.co.jp">
       </div>
+
       <div class="uk-margin">
-        <label class="uk-form-label">電話番号</label>
         <input class="uk-input" name="userRights.phone" placeholder="03-0000-0000">
       </div>
+
       <div class="uk-margin">
-        <label class="uk-form-label">手続きの流れ</label>
-        <textarea class="uk-textarea" name="userRights.procedure" rows="2"
-          placeholder="本人確認の上、速やかに対応いたします（通常1週間以内）。"></textarea>
+        <textarea class="uk-textarea" name="userRights.procedure" rows="2" placeholder="本人確認の上、速やかに対応いたします（通常1週間以内）。"></textarea>
       </div>
 
       <hr>
 
       <!-- 法的情報 -->
-      <h3 class="icon-heading"><span uk-icon="file-edit" ratio="1.2"></span> 法的情報</h3>
+      <h3 class="uk-heading-bullet"><span uk-icon="file-edit"></span> 法的情報</h3>
+
       <div class="uk-grid-small" uk-grid>
         <div class="uk-width-1-2@s">
           <label class="uk-form-label">発効日</label>
           <input class="uk-input" type="date" name="legal.effectiveDate">
         </div>
         <div class="uk-width-1-2@s">
-          <label class="uk-form-label">準拠法</label><br>
           <label><input class="uk-checkbox" type="checkbox" name="legal.governingLaw" value="日本法"> 日本法に基づく</label>
         </div>
       </div>
@@ -260,18 +226,16 @@
 
     </form>
 
-    <div class="uk-card uk-card-default uk-card-body uk-box-shadow-small uk-margin-large-top">
-      <h3 class="icon-heading"><span uk-icon="eye" ratio="1.2"></span> プレビュー</h3>
+    <div class="uk-card uk-card-default uk-card-body uk-margin-large-top">
+      <h3 class="uk-heading-bullet"><span uk-icon="eye"></span> プレビュー</h3>
       <div id="preview" class="uk-margin-small-top uk-padding-small uk-background-default uk-overflow-auto"></div>
-      <p class="uk-text-small uk-text-muted uk-margin-small-top">※ 入力内容に基づいて生成されたHTMLをリアルタイムで表示します。</p>
+      <p class="uk-text-meta">※ 入力内容に基づいて生成されたHTMLをリアルタイムで表示します。</p>
     </div>
   </div>
 
   <!-- UIkit JS -->
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit-icons.min.js"></script>
-
-  <!-- メインスクリプト -->
   <script src="script.js" defer></script>
 
 </body>
