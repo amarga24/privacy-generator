@@ -78,14 +78,18 @@
   addAnalyticsRow(); // 初期行
 
 
-  // ------------------------------------------------------------
-  // 入力補助関数
-  // ------------------------------------------------------------
-  const getInputValue = (el) => el?.value.trim() || "";
-  const get = (form, n) => form.querySelector(`[name="${n}"]`);
-  const getVal = (form, n) => getInputValue(get(form, n));
-  const getBool = (form, n) => !!get(form, n)?.checked;
-  const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
+// ------------------------------------------------------------
+// 入力補助関数
+// ------------------------------------------------------------
+const getInputValue = (el) => el?.value.trim() || "";
+
+// ドットを含む name 属性を正しく検索できるよう修正
+const get = (form, n) => form.querySelector(`[name="${CSS.escape(n)}"]`);
+
+const getVal = (form, n) => getInputValue(get(form, n));
+const getBool = (form, n) => !!get(form, n)?.checked;
+const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
+
 
 
   // ------------------------------------------------------------
