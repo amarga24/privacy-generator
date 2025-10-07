@@ -78,18 +78,14 @@
   addAnalyticsRow(); // 初期行
 
 
-// ------------------------------------------------------------
-// 入力補助関数
-// ------------------------------------------------------------
-const getInputValue = (el) => el?.value.trim() || "";
-
-// ドットを含む name 属性を正しく検索できるよう修正
-const get = (form, n) => form.querySelector(`[name="${CSS.escape(n)}"]`);
-
-const getVal = (form, n) => getInputValue(get(form, n));
-const getBool = (form, n) => !!get(form, n)?.checked;
-const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
-
+  // ------------------------------------------------------------
+  // 入力補助関数
+  // ------------------------------------------------------------
+  const getInputValue = (el) => el?.value.trim() || "";
+  const get = (form, n) => form.querySelector(`[name="${CSS.escape(n)}"]`);
+  const getVal = (form, n) => getInputValue(get(form, n));
+  const getBool = (form, n) => !!get(form, n)?.checked;
+  const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
 
 
   // ------------------------------------------------------------
@@ -117,22 +113,27 @@ const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
       collection: {
         methods: toList(getVal(form, "collection.methods")),
         autoCollection: toList(getVal(form, "collection.autoCollection")),
-        detail: getVal(form, "collection.detail")
+        detail: getVal(form, "collection.detail"),
+        noCollection: getBool(form, "collection.noCollection")
       },
       purposes: pv,
+      purposesFlag: getBool(form, "purposes.noPurpose"),
       thirdParties: {
         hasProvision: getBool(form, "thirdParties.hasProvision"),
         detail: getVal(form, "thirdParties.detail"),
         entrustsProcessing: getBool(form, "thirdParties.entrustsProcessing"),
-        entrustExamples: toList(getVal(form, "thirdParties.entrustExamples"))
+        entrustExamples: toList(getVal(form, "thirdParties.entrustExamples")),
+        noThirdparty: getBool(form, "thirdParties.noThirdparty")
       },
       analytics: {
         useAnalytics: getBool(form, "analytics.useAnalytics"),
+        noAnalytics: getBool(form, "analytics.noAnalytics"),
         tools
       },
       cookies: {
         purposes: toList(getVal(form, "cookies.purposes")),
-        disableMethod: getVal(form, "cookies.disableMethod")
+        disableMethod: getVal(form, "cookies.disableMethod"),
+        noCookies: getBool(form, "cookies.noCookies")
       },
       security: {
         measures: toList(getVal(form, "security.measures"))
@@ -140,7 +141,6 @@ const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
       userRights: {
         contact: getVal(form, "userRights.contact"),
         phone: getVal(form, "userRights.phone"),
-        address: getVal(form, "userRights.address"),
         procedure: getVal(form, "userRights.procedure")
       },
       legal: {
@@ -164,7 +164,6 @@ const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
     const form = e.currentTarget;
     const json = formToJSON(form);
 
-    // API呼び出し
     const res = await fetch("/api/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -174,7 +173,6 @@ const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
     const html = await res.text();
     preview.innerHTML = html;
 
-    // ダウンロード用Blob生成
     const blob = new Blob([html], { type: "text/html;charset=utf-8" });
     const url = URL.createObjectURL(blob);
 
