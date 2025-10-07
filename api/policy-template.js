@@ -1,231 +1,159 @@
 ﻿// ============================================================
 // api/policy-template.js
 // ------------------------------------------------------------
-// 概要: プライバシーポリシーHTML本文を生成するモジュール。
-// 仕様: api/config/sections.js の順序に基づきセクションを構築。
-// 注意: 入力データは保存せず、レスポンス生成後に破棄。
+// 概要: 入力データ（フォーム内容）を受け取り、
+//       プライバシーポリシーのHTML本文を作るファイルです。
+// 特徴: 未入力の項目があった場合、自動的に
+//       「（※要修正※）」という印を付けて出力します。
+//       さらに、不正なタグなどを無効化して安全に表示します。
+// 注意: 入力データは保存されず、生成後に破棄されます。
 // ============================================================
 
 
-// ------------------------------------------------------------
-// 個人情報の取得方法セクション
-// ------------------------------------------------------------
-// 【目的】
-// ユーザーからの入力や自動取得情報（Cookie等）を説明する。
-// 【入力】data.collection
-// 【出力】<section>要素（取得方法の説明）
-// ------------------------------------------------------------
-function sectionCollection(data) {
-  const { methods = [], autoCollection = [], detail = "" } = data.collection || {};
-  return `
-  <section>
-    <h2>個人情報の取得方法</h2>
-    <p>当サイトでは、${methods.join("、") || "お問い合わせフォームなど"} を通じて利用者から個人情報を取得する場合があります。</p>
-    <p>また、自動的に取得される情報として、${autoCollection.join("、") || "アクセスログやCookie情報"} を取得します。</p>
-    ${detail ? `<p>${detail}</p>` : ""}
-  </section>`;
+/**
+ * ------------------------------------------------------------
+ * cleanInput()
+ * ------------------------------------------------------------
+ * 入力内容を安全に整える関数です。
+ * - 何も入力されていない場合は「（※要修正※）」を自動で付けます。
+ * - < や > などの記号を無害化して、HTMLタグとして動かないようにします。
+ *
+ * こうすることで、ユーザーが入力した内容をそのまま表示しても
+ * サイトが壊れたり、悪意あるコードが動いたりするのを防ぎます。
+ *
+ * @param {string} value - 入力内容
+ * @param {string} placeholder - 未入力時に表示する補足文
+ * @returns {string} 整えた文字列
+ */
+function cleanInput(value, placeholder) {
+  if (!value || String(value).trim() === "") {
+    return `（※要修正※）${placeholder}`;
+  }
+  // 特殊記号を安全に変換する
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
 }
 
 
-// ------------------------------------------------------------
-// 個人情報の利用目的セクション
-// ------------------------------------------------------------
-// 【目的】
-// 取得した個人情報をどのような目的で利用するかを説明する。
-// 【入力】data.purposes[] 配列（カテゴリ、対象、説明）
-// 【出力】<section>要素（利用目的のリスト）
-// ------------------------------------------------------------
-function sectionPurposes(data) {
-  const purposes = data.purposes || [];
-  if (!purposes.length) return "";
-
-  const list = purposes
-    .map(
-      p => `<li>${p.category || ""}（対象：${p.target || "該当者"}） … ${p.description || ""}</li>`
-    )
-    .join("");
-
-  return `
-  <section>
-    <h2>個人情報の利用目的</h2>
-    <p>取得した個人情報は、以下の目的のために利用します。</p>
-    <ul>${list}</ul>
-  </section>`;
-}
-
-
-// ------------------------------------------------------------
-// 第三者提供および外部委託セクション
-// ------------------------------------------------------------
-// 【目的】
-// 個人情報を第三者に提供または外部に委託する場合の取扱いを説明。
-// 【入力】data.thirdParties（hasProvision, entrustsProcessing 等）
-// 【出力】<section>要素（提供・委託の有無と方針）
-// ------------------------------------------------------------
-function sectionThirdParties(data) {
-  const tp = data.thirdParties || {};
-  return `
-  <section>
-    <h2>個人情報の第三者提供および委託</h2>
-    ${
-      tp.hasProvision
-        ? `<p>当サイトでは、${tp.detail || "必要な範囲で第三者提供を行う場合があります。"}。</p>`
-        : `<p>当サイトでは、法令に基づく場合を除き、第三者への個人情報の提供は行いません。</p>`
-    }
-    ${
-      tp.entrustsProcessing
-        ? `<p>業務委託にあたっては、${(tp.entrustExamples || []).join("、") || "委託先企業"} に適切な管理を求めています。</p>`
-        : ""
-    }
-  </section>`;
-}
-
-
-// ------------------------------------------------------------
-// アクセス解析ツールセクション
-// ------------------------------------------------------------
-// 【目的】
-// Google Analytics などの解析ツールの利用状況を説明。
-// 【入力】data.analytics（useAnalytics, tools[]）
-// 【出力】<section>要素（ツール名・提供者・目的・オプトアウトURL）
-// ------------------------------------------------------------
-function sectionAnalytics(data) {
-  const analytics = data.analytics || {};
-  if (!analytics.useAnalytics) return "";
-
-  const tools = (analytics.tools || [])
-    .map(
-      t => `<li>${t.name}（提供者：${t.provider}） … ${t.purpose || ""}${
-        t.optoutUrl ? `（<a href="${t.optoutUrl}" target="_blank">オプトアウト</a>）` : ""
-      }</li>`
-    )
-    .join("");
-
-  return `
-  <section>
-    <h2>アクセス解析ツールの利用</h2>
-    <p>当サイトでは、以下のアクセス解析ツールを利用しています。</p>
-    <ul>${tools}</ul>
-  </section>`;
-}
-
-
-// ------------------------------------------------------------
-// Cookie（クッキー）利用セクション
-// ------------------------------------------------------------
-// 【目的】
-// Cookie の利用目的および無効化方法を説明。
-// 【入力】data.cookies（purposes[], disableMethod）
-// 【出力】<section>要素（Cookie使用の説明）
-// ------------------------------------------------------------
-function sectionCookies(data) {
-  const cookies = data.cookies || {};
-  return `
-  <section>
-    <h2>Cookie（クッキー）の使用について</h2>
-    <p>当サイトでは、${(cookies.purposes || []).join("、") || "利便性向上やアクセス解析"} の目的でCookieを使用しています。</p>
-    <p>Cookieの無効化は、${cookies.disableMethod || "各ブラウザの設定画面から行うことができます。"}。</p>
-  </section>`;
-}
-
-
-// ------------------------------------------------------------
-// 個人情報の管理体制セクション
-// ------------------------------------------------------------
-// 【目的】
-// 安全管理措置（暗号化、権限制御、教育など）を明示。
-// 【入力】data.security（measures[]）
-// 【出力】<section>要素（管理措置の説明）
-// ------------------------------------------------------------
-function sectionSecurity(data) {
-  const sec = data.security || {};
-  return `
-  <section>
-    <h2>個人情報の管理体制</h2>
-    <p>当サイトでは、${(sec.measures || ["SSL/TLS通信の暗号化", "アクセス権限の制限", "定期的な見直し"]).join("、")} などの措置を講じています。</p>
-  </section>`;
-}
-
-
-// ------------------------------------------------------------
-// 開示・訂正・削除等の請求セクション
-// ------------------------------------------------------------
-// 【目的】
-// 利用者が自身の情報を請求・訂正・削除できる手続を説明。
-// 【入力】data.userRights（contact, phone, address, procedure）
-// 【出力】<section>要素（問い合わせ先と手順）
-// ------------------------------------------------------------
-function sectionUserRights(data) {
-  const ur = data.userRights || {};
-  return `
-  <section>
-    <h2>開示・訂正・削除等の請求について</h2>
-    <p>利用者ご本人からの開示・訂正・削除等のご請求には、適切に対応いたします。</p>
-    <ul>
-      ${ur.contact ? `<li>メールアドレス：${ur.contact}</li>` : ""}
-      ${ur.phone ? `<li>電話番号：${ur.phone}</li>` : ""}
-      ${ur.address ? `<li>住所：${ur.address}</li>` : ""}
-    </ul>
-    ${ur.procedure ? `<p>${ur.procedure}</p>` : ""}
-  </section>`;
-}
-
-
-// ------------------------------------------------------------
-// 法令遵守および施行日セクション
-// ------------------------------------------------------------
-// 【目的】
-// 法令準拠、ポリシー改訂、施行日などを記載。
-// 【入力】data.legal（effectiveDate, governingLaw）
-// 【出力】<section>要素（施行日および準拠法）
-// ------------------------------------------------------------
-function sectionLegal(data) {
-  const lg = data.legal || {};
-  return `
-  <section>
-    <h2>法令、規範の遵守と見直し</h2>
-    <p>当サイトは、適用される日本の法令およびその他の規範を遵守し、継続的に見直しと改善を行います。</p>
-    <p>本ポリシーは ${lg.effectiveDate || "制定日未設定"} より施行します。</p>
-  </section>`;
-}
-
-
-// ------------------------------------------------------------
-// 全セクションを統合し、最終HTMLを組み立て
-// ------------------------------------------------------------
-// 【目的】
-// 各セクション生成関数を呼び出し、完全なHTML文書を構築。
-// 【入力】generate.js から渡される JSON データ全体
-// 【出力】プライバシーポリシーのHTML文字列
-// ------------------------------------------------------------
+/**
+ * ------------------------------------------------------------
+ * buildPolicyHTML()
+ * ------------------------------------------------------------
+ * フォームで入力された情報をもとに、
+ * プライバシーポリシーの本文HTMLを作る関数です。
+ * 未入力の項目には「（※要修正※）」を自動で追加します。
+ *
+ * @param {Object} data - フロント側から送られる入力データ
+ * @returns {string} 完成したHTML本文
+ */
 export function buildPolicyHTML(data) {
+  // --------------------------------------------
+  // 入力データを取り出す
+  // --------------------------------------------
+  const {
+    siteName,
+    operatorName,
+    contactEmail,
+    establishedDate,
+    purpose,
+    analyticsTool,
+    delegation,
+  } = data || {};
+
+  // --------------------------------------------
+  // 各項目を安全に整える
+  // --------------------------------------------
+  const site = cleanInput(siteName, "サイト名未設定");
+  const operator = cleanInput(operatorName, "運営者名未設定");
+  const email = cleanInput(contactEmail, "メールアドレス未設定");
+  const date = cleanInput(establishedDate, "制定日未設定");
+  const tool = cleanInput(analyticsTool, "アクセス解析ツール未記入");
+  const purposeText = cleanInput(purpose, "利用目的未記入");
+  const delegate = cleanInput(delegation, "委託先情報未記入");
+
+  // --------------------------------------------
+  // プライバシーポリシー本文を組み立てる
+  // --------------------------------------------
   return `
-  <!DOCTYPE html>
-  <html lang="ja">
-  <head>
-    <meta charset="utf-8">
-    <title>${data.base?.siteName || "プライバシーポリシー"}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <style>
-      body { font-family: system-ui, sans-serif; color:#333; line-height:1.7; padding:24px; max-width:880px; margin:auto; background:#fff; }
-      h1 { font-size:1.8em; border-bottom:2px solid #333; padding-bottom:4px; margin-bottom:1em; }
-      h2 { font-size:1.2em; margin-top:1.4em; border-left:4px solid #999; padding-left:8px; }
-      p, li { margin-bottom:.6em; }
-      ul { padding-left:1.2em; }
-    </style>
-  </head>
-  <body>
-    <h1>プライバシーポリシー</h1>
-    <p>本プライバシーポリシーは、${data.base?.operatorName || "当サイト運営者"}（以下「当社」といいます）が運営する「${data.base?.siteName || "本サイト"}」における個人情報の取扱いについて定めるものです。</p>
-    ${sectionCollection(data)}
-    ${sectionPurposes(data)}
-    ${sectionThirdParties(data)}
-    ${sectionAnalytics(data)}
-    ${sectionCookies(data)}
-    ${sectionSecurity(data)}
-    ${sectionUserRights(data)}
-    ${sectionLegal(data)}
-    <p style="margin-top:2em; font-size:.9em; color:#666;">以上</p>
-  </body>
-  </html>`;
+<article class="uk-article policy-content uk-margin-large-top">
+
+  <h2 class="uk-heading-line"><span>プライバシーポリシー</span></h2>
+  <p>
+    本プライバシーポリシーは、${operator}（以下「当社」といいます。）が運営する
+    「${site}」（以下「本サイト」といいます。）における個人情報の取扱いについて定めるものです。
+  </p>
+
+  <section class="uk-section-xsmall">
+    <h3 class="uk-h3">個人情報の取得方法</h3>
+    <p>
+      当サイトでは、お問い合わせフォームなどを通じて、利用者から個人情報を取得する場合があります。
+      また、自動的に取得される情報として、アクセスログやCookie情報を取得します。
+    </p>
+  </section>
+
+  <section class="uk-section-xsmall">
+    <h3 class="uk-h3">個人情報の利用目的</h3>
+    <p>
+      ${purposeText}
+    </p>
+  </section>
+
+  <section class="uk-section-xsmall">
+    <h3 class="uk-h3">アクセス解析ツールの使用</h3>
+    <p>
+      当サイトでは、${tool} を利用しています。
+      これにより収集されるデータは匿名であり、個人を特定するものではありません。
+    </p>
+  </section>
+
+  <section class="uk-section-xsmall">
+    <h3 class="uk-h3">個人情報の第三者提供および委託</h3>
+    <p>
+      当サイトでは、法令に基づく場合を除き、第三者への個人情報の提供は行いません。
+      ${delegate}
+    </p>
+  </section>
+
+  <section class="uk-section-xsmall">
+    <h3 class="uk-h3">Cookie（クッキー）の使用について</h3>
+    <p>
+      当サイトでは、利便性の向上やアクセス解析の目的でCookieを使用しています。
+      Cookieの無効化は、各ブラウザの設定画面から行うことができます。
+    </p>
+  </section>
+
+  <section class="uk-section-xsmall">
+    <h3 class="uk-h3">個人情報の管理体制</h3>
+    <p>
+      当サイトでは、SSL/TLS通信による暗号化、アクセス権限の制限、
+      および定期的な見直しなどの措置を講じています。
+    </p>
+  </section>
+
+  <section class="uk-section-xsmall">
+    <h3 class="uk-h3">開示・訂正・削除等の請求について</h3>
+    <p>
+      利用者ご本人からの開示・訂正・削除等のご請求には、適切かつ迅速に対応いたします。<br>
+      ご連絡は以下のメールアドレスまでお願いいたします：<br>
+      <a href="mailto:${email}" class="uk-link-text">${email}</a>
+    </p>
+  </section>
+
+  <section class="uk-section-xsmall">
+    <h3 class="uk-h3">法令・規範の遵守と見直し</h3>
+    <p>
+      当サイトは、適用される日本の法令およびその他の規範を遵守し、
+      継続的に見直しと改善を行います。
+    </p>
+  </section>
+
+  <p class="policy-date uk-text-meta uk-margin-top">
+    本ポリシーは <strong class="uk-text-danger">${date}</strong> より施行します。
+  </p>
+
+  <p class="uk-text-right uk-margin-remove-bottom">以上</p>
+</article>
+`;
 }
