@@ -86,21 +86,23 @@
   const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
 
   // ------------------------------------------------------------
-  // 「該当なし」チェックと入力無効化の連動制御（対象3セクション）
+  // 「該当なし」チェックと入力無効化の連動制御
   // ------------------------------------------------------------
   const noCheckPairs = [
-    { check: "collection.noCollection", sectionId: "collectionSection" }, // 個人情報の取得方法
+    { check: "collection.noCollection", sectionId: "collectionSection" },     // 個人情報の取得方法
+    { check: "purposes.noPurpose", sectionId: "purposesSection" },            // 利用目的 ←追加
     { check: "thirdParties.noThirdparty", sectionId: "thirdPartiesSection" }, // 第三者提供・委託
-    { check: "cookies.noCookies", sectionId: "cookiesSection" } // Cookie
+    { check: "analytics.noAnalytics", sectionId: "analyticsSection" },        // アクセス解析 ←追加
+    { check: "cookies.noCookies", sectionId: "cookiesSection" }               // Cookie
   ];
 
-  // 初期化（すべて未チェックに）
+  // 初期化（全チェック未選択）
   noCheckPairs.forEach(p => {
     const cb = document.querySelector(`[name="${p.check}"]`);
     if (cb) cb.checked = false;
   });
 
-  // 共通の制御関数
+  // 共通関数：入力を無効化／有効化
   const toggleSectionInputs = (sectionRoot, disabled) => {
     if (!sectionRoot) return;
     sectionRoot.querySelectorAll("input, textarea, select, button").forEach(el => {
@@ -109,12 +111,11 @@
     });
   };
 
-  // 各セクションでチェック連動
+  // 各セクションにイベント付与
   noCheckPairs.forEach(p => {
     const cb = document.querySelector(`[name="${p.check}"]`);
     const section = document.getElementById(p.sectionId);
     if (!cb || !section) return;
-
     cb.addEventListener("change", () => {
       toggleSectionInputs(section, cb.checked);
     });
