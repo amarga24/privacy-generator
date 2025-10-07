@@ -56,28 +56,30 @@
     <hr>
 
     <!-- 個人情報の取得方法 -->
-    <h3 class="icon-heading"><span uk-icon="lock" ratio="1.2"></span> 個人情報の取得方法</h3>
-    <p class="section-desc">
-      問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
-      各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
-    </p>
-    <div class="uk-margin">
-      <label><input class="uk-checkbox" type="checkbox" name="collection.noCollection"> 該当なし</label>
-    </div>
-    <hr class="uk-divider-small">
-    <p class="section-desc">どのような方法で個人情報を取得しているかを入力してください。</p>
-    <div class="uk-margin">
-      <label class="uk-form-label">ユーザー入力による取得</label>
-      <input class="uk-input" name="collection.methods" placeholder="お問い合わせフォーム, 会員登録フォーム">
-    </div>
-    <div class="uk-margin">
-      <label class="uk-form-label">自動取得される情報</label>
-      <input class="uk-input" name="collection.autoCollection" placeholder="アクセスログ, Cookie, IPアドレス">
-    </div>
-    <div class="uk-margin">
-      <label class="uk-form-label">補足説明</label>
-      <textarea class="uk-textarea" name="collection.detail" rows="2" placeholder="利用状況分析のためCookieを使用しています。"></textarea>
-    </div>
+    <section id="collectionSection">
+      <h3 class="icon-heading"><span uk-icon="lock" ratio="1.2"></span> 個人情報の取得方法</h3>
+      <p class="section-desc">
+        問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
+        各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
+      </p>
+      <div class="uk-margin">
+        <label><input class="uk-checkbox" type="checkbox" name="collection.noCollection"> 該当なし</label>
+      </div>
+      <hr class="uk-divider-small">
+      <p class="section-desc">どのような方法で個人情報を取得しているかを入力してください。</p>
+      <div class="uk-margin">
+        <label class="uk-form-label">ユーザー入力による取得</label>
+        <input class="uk-input" name="collection.methods" placeholder="お問い合わせフォーム, 会員登録フォーム">
+      </div>
+      <div class="uk-margin">
+        <label class="uk-form-label">自動取得される情報</label>
+        <input class="uk-input" name="collection.autoCollection" placeholder="アクセスログ, Cookie, IPアドレス">
+      </div>
+      <div class="uk-margin">
+        <label class="uk-form-label">補足説明</label>
+        <textarea class="uk-textarea" name="collection.detail" rows="2" placeholder="利用状況分析のためCookieを使用しています。"></textarea>
+      </div>
+    </section>
 
     <hr>
 
@@ -99,30 +101,32 @@
     <hr>
 
     <!-- 第三者提供・委託 -->
-    <h3 class="icon-heading"><span uk-icon="users" ratio="1.2"></span> 第三者提供・委託</h3>
-    <p class="section-desc">
-      問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
-      各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
-    </p>
-    <div class="uk-margin">
-      <label><input class="uk-checkbox" type="checkbox" name="thirdParties.noThirdparty"> 該当なし</label>
-    </div>
-    <hr class="uk-divider-small">
-    <p class="section-desc">個人情報を第三者に提供または外部に委託する場合に入力してください。</p>
-    <div class="uk-margin">
-      <label><input class="uk-checkbox" type="checkbox" name="thirdParties.hasProvision"> 第三者提供あり</label>
-    </div>
-    <div class="uk-margin">
-      <label class="uk-form-label">第三者提供の説明</label>
-      <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者へ提供しません。"></textarea>
-    </div>
-    <div class="uk-margin">
-      <label><input class="uk-checkbox" type="checkbox" name="thirdParties.entrustsProcessing"> 委託あり</label>
-    </div>
-    <div class="uk-margin">
-      <label class="uk-form-label">委託先の例</label>
-      <input class="uk-input" name="thirdParties.entrustExamples" placeholder="サーバー会社, 決済代行業者">
-    </div>
+    <section id="thirdPartiesSection">
+      <h3 class="icon-heading"><span uk-icon="users" ratio="1.2"></span> 第三者提供・委託</h3>
+      <p class="section-desc">
+        問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
+        各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
+      </p>
+      <div class="uk-margin">
+        <label><input class="uk-checkbox" type="checkbox" name="thirdParties.noThirdparty"> 該当なし</label>
+      </div>
+      <hr class="uk-divider-small">
+      <p class="section-desc">個人情報を第三者に提供または外部に委託する場合に入力してください。</p>
+      <div class="uk-margin">
+        <label><input class="uk-checkbox" type="checkbox" name="thirdParties.hasProvision"> 第三者提供あり</label>
+      </div>
+      <div class="uk-margin">
+        <label class="uk-form-label">第三者提供の説明</label>
+        <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者へ提供しません。"></textarea>
+      </div>
+      <div class="uk-margin">
+        <label><input class="uk-checkbox" type="checkbox" name="thirdParties.entrustsProcessing"> 委託あり</label>
+      </div>
+      <div class="uk-margin">
+        <label class="uk-form-label">委託先の例</label>
+        <input class="uk-input" name="thirdParties.entrustExamples" placeholder="サーバー会社, 決済代行業者">
+      </div>
+    </section>
 
     <hr>
 
@@ -146,24 +150,26 @@
     <hr>
 
     <!-- Cookie -->
-    <h3 class="icon-heading"><span uk-icon="database" ratio="1.2"></span> Cookie</h3>
-    <p class="section-desc">
-      問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
-      各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
-    </p>
-    <div class="uk-margin">
-      <label><input class="uk-checkbox" type="checkbox" name="cookies.noCookies"> 該当なし</label>
-    </div>
-    <hr class="uk-divider-small">
-    <p class="section-desc">Cookieの使用目的や無効化方法を入力してください。</p>
-    <div class="uk-margin">
-      <label class="uk-form-label">使用目的</label>
-      <input class="uk-input" name="cookies.purposes" placeholder="利便性向上, アクセス解析, 広告配信">
-    </div>
-    <div class="uk-margin">
-      <label class="uk-form-label">無効化方法</label>
-      <input class="uk-input" name="cookies.disableMethod" placeholder="ブラウザ設定からCookieを無効化できます。">
-    </div>
+    <section id="cookiesSection">
+      <h3 class="icon-heading"><span uk-icon="database" ratio="1.2"></span> Cookie</h3>
+      <p class="section-desc">
+        問い合わせフォーム、会員登録機能、Cookieやアクセス解析を使っていない場合には、
+        各入力項目は未記入のまま、下記の「該当なし」をチェックしてください。
+      </p>
+      <div class="uk-margin">
+        <label><input class="uk-checkbox" type="checkbox" name="cookies.noCookies"> 該当なし</label>
+      </div>
+      <hr class="uk-divider-small">
+      <p class="section-desc">Cookieの使用目的や無効化方法を入力してください。</p>
+      <div class="uk-margin">
+        <label class="uk-form-label">使用目的</label>
+        <input class="uk-input" name="cookies.purposes" placeholder="利便性向上, アクセス解析, 広告配信">
+      </div>
+      <div class="uk-margin">
+        <label class="uk-form-label">無効化方法</label>
+        <input class="uk-input" name="cookies.disableMethod" placeholder="ブラウザ設定からCookieを無効化できます。">
+      </div>
+    </section>
 
     <hr>
 
