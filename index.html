@@ -5,24 +5,11 @@
   <meta charset="utf-8" />
   <title>プライバシーポリシージェネレーター</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <!-- UIkit CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/css/uikit.min.css" />
-
   <style>
-    body {
-      background: #f8f9fb;
-    }
-
-    .required-label {
-      color: #e60033;
-      font-size: 0.8em;
-      margin-left: 4px;
-    }
-
-    ::placeholder {
-      color: #999;
-    }
+    body { background: #f8f9fb; }
+    .required-label { color: #e60033; font-size: 0.8em; margin-left: 4px; }
+    ::placeholder { color: #999; }
   </style>
 </head>
 
@@ -30,9 +17,7 @@
 
   <div class="uk-container uk-margin-large-top uk-margin-large-bottom">
     <h1 class="uk-heading-line"><span>Web Privacy Policy Generator</span></h1>
-    <p class="uk-text-small uk-text-muted">
-      入力内容は保存されません。「生成する」を押すと下部にHTMLがプレビューされます。
-    </p>
+    <p class="uk-text-small uk-text-muted">入力内容は保存されません。「生成する」を押すと下部にHTMLがプレビューされます。</p>
 
     <form id="policyForm" class="uk-form-stacked uk-card uk-card-default uk-card-body uk-margin">
 
@@ -119,19 +104,13 @@
           <label><input class="uk-checkbox" type="checkbox" name="thirdParties.noThirdparty"> 該当なし</label>
         </div>
 
-        <div class="uk-margin-small">
-          <label><input class="uk-checkbox" type="checkbox" name="thirdParties.hasProvision"> 第三者提供あり</label>
+        <div class="uk-margin">
+          <label class="uk-form-label">第三者提供・委託に関する説明</label>
+          <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者への提供および委託は行いません。"></textarea>
         </div>
 
         <div class="uk-margin">
-          <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者へ提供しません。"></textarea>
-        </div>
-
-        <div class="uk-margin-small">
-          <label><input class="uk-checkbox" type="checkbox" name="thirdParties.entrustsProcessing"> 委託あり</label>
-        </div>
-
-        <div class="uk-margin">
+          <label class="uk-form-label">委託先の例</label>
           <input class="uk-input" name="thirdParties.entrustExamples" placeholder="サーバー会社, 決済代行業者">
         </div>
       </section>
@@ -145,10 +124,6 @@
 
         <div class="uk-margin-small">
           <label><input class="uk-checkbox" type="checkbox" name="analytics.noAnalytics"> 該当なし</label>
-        </div>
-
-        <div class="uk-margin-small">
-          <label><input class="uk-checkbox" type="checkbox" name="analytics.useAnalytics"> 利用する</label>
         </div>
 
         <div id="analyticsWrap"></div>
@@ -233,11 +208,9 @@
     </div>
   </div>
 
-  <!-- UIkit JS -->
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit-icons.min.js"></script>
   <script src="script.js" defer></script>
 
 </body>
-
 </html>

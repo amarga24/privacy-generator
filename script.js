@@ -2,15 +2,10 @@
 // script.js
 // ------------------------------------------------------------
 // 概要: index.html のフォーム操作・プレビュー生成を制御する。
-// 構成: UIkit3 を利用した動的フォーム＋サーバーレス呼び出し。
-// 注意: 入力データは保存されず、ローカルでのみ一時保持。
 // ============================================================
 
 (function () {
 
-  // ------------------------------------------------------------
-  // DOMヘルパー関数
-  // ------------------------------------------------------------
   const $ = (s) => document.querySelector(s);
   const createEl = (html) => {
     const t = document.createElement("template");
@@ -19,121 +14,81 @@
   };
 
   // ------------------------------------------------------------
-  // 利用目的フォームの動的追加
+  // 利用目的フォーム
   // ------------------------------------------------------------
   const purposesWrap = $("#purposesWrap");
-
   const addPurposeRow = () => {
     purposesWrap.appendChild(createEl(`
       <div class="uk-grid-small uk-margin-small" uk-grid>
-        <div class="uk-width-1-3@s">
-          <label class="uk-form-label">カテゴリ</label>
-          <input class="uk-input" data-k="category" placeholder="商品発送">
-        </div>
-        <div class="uk-width-1-3@s">
-          <label class="uk-form-label">対象</label>
-          <input class="uk-input" data-k="target" placeholder="お客様">
-        </div>
-        <div class="uk-width-1-3@s">
-          <label class="uk-form-label">説明</label>
-          <input class="uk-input" data-k="description" placeholder="お問い合わせ対応、サービス改善のため">
-        </div>
-      </div>
-    `));
+        <div class="uk-width-1-3@s"><input class="uk-input" data-k="category" placeholder="カテゴリ"></div>
+        <div class="uk-width-1-3@s"><input class="uk-input" data-k="target" placeholder="対象"></div>
+        <div class="uk-width-1-3@s"><input class="uk-input" data-k="description" placeholder="説明"></div>
+      </div>`));
   };
-
   $("#addPurpose").addEventListener("click", addPurposeRow);
-  addPurposeRow(); // 初期行
+  addPurposeRow();
 
   // ------------------------------------------------------------
-  // アクセス解析フォームの動的追加
+  // アクセス解析フォーム
   // ------------------------------------------------------------
   const analyticsWrap = $("#analyticsWrap");
-
   const addAnalyticsRow = () => {
     analyticsWrap.appendChild(createEl(`
       <div class="uk-grid-small uk-margin-small" uk-grid>
-        <div class="uk-width-1-4@m">
-          <label class="uk-form-label">ツール名</label>
-          <input class="uk-input" data-k="name" placeholder="Google Analytics 4">
-        </div>
-        <div class="uk-width-1-4@m">
-          <label class="uk-form-label">提供者</label>
-          <input class="uk-input" data-k="provider" placeholder="Google LLC">
-        </div>
-        <div class="uk-width-1-4@m">
-          <label class="uk-form-label">目的</label>
-          <input class="uk-input" data-k="purpose" placeholder="利用状況の分析">
-        </div>
-        <div class="uk-width-1-4@m">
-          <label class="uk-form-label">オプトアウトURL</label>
-          <input class="uk-input" data-k="optoutUrl" placeholder="https://tools.google.com/dlpage/gaoptout">
-        </div>
-      </div>
-    `));
+        <div class="uk-width-1-4@m"><input class="uk-input" data-k="name" placeholder="ツール名"></div>
+        <div class="uk-width-1-4@m"><input class="uk-input" data-k="provider" placeholder="提供者"></div>
+        <div class="uk-width-1-4@m"><input class="uk-input" data-k="purpose" placeholder="目的"></div>
+        <div class="uk-width-1-4@m"><input class="uk-input" data-k="optoutUrl" placeholder="オプトアウトURL"></div>
+      </div>`));
   };
-
   $("#addAnalytics").addEventListener("click", addAnalyticsRow);
-  addAnalyticsRow(); // 初期行
+  addAnalyticsRow();
 
   // ------------------------------------------------------------
-  // 入力補助関数
-  // ------------------------------------------------------------
-  const getInputValue = (el) => el?.value.trim() || "";
-  const get = (form, n) => form.querySelector(`[name="${CSS.escape(n)}"]`);
-  const getVal = (form, n) => getInputValue(get(form, n));
-  const getBool = (form, n) => !!get(form, n)?.checked;
-  const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
-
-  // ------------------------------------------------------------
-  // 「該当なし」チェックと入力無効化の連動制御
+  // 「該当なし」チェック連動
   // ------------------------------------------------------------
   const noCheckPairs = [
-    { check: "collection.noCollection", sectionId: "collectionSection" },     // 個人情報の取得方法
-    { check: "purposes.noPurpose", sectionId: "purposesSection" },            // 利用目的 ←追加
-    { check: "thirdParties.noThirdparty", sectionId: "thirdPartiesSection" }, // 第三者提供・委託
-    { check: "analytics.noAnalytics", sectionId: "analyticsSection" },        // アクセス解析 ←追加
-    { check: "cookies.noCookies", sectionId: "cookiesSection" }               // Cookie
+    { check: "collection.noCollection", sectionId: "collectionSection" },
+    { check: "purposes.noPurpose", sectionId: "purposesSection" },
+    { check: "thirdParties.noThirdparty", sectionId: "thirdPartiesSection" },
+    { check: "analytics.noAnalytics", sectionId: "analyticsSection" },
+    { check: "cookies.noCookies", sectionId: "cookiesSection" }
   ];
 
-  // 初期化（全チェック未選択）
   noCheckPairs.forEach(p => {
-    const cb = document.querySelector(`[name="${p.check}"]`);
-    if (cb) cb.checked = false;
-  });
-
-  // 共通関数：入力を無効化／有効化
-  const toggleSectionInputs = (sectionRoot, disabled) => {
-    if (!sectionRoot) return;
-    sectionRoot.querySelectorAll("input, textarea, select, button").forEach(el => {
-      if (el.type === "checkbox" && el.name.includes("no")) return;
-      el.disabled = disabled;
-    });
-  };
-
-  // 各セクションにイベント付与
-  noCheckPairs.forEach(p => {
-    const cb = document.querySelector(`[name="${p.check}"]`);
+    const cb = $(`[name="${p.check}"]`);
     const section = document.getElementById(p.sectionId);
-    if (!cb || !section) return;
-    cb.addEventListener("change", () => {
-      toggleSectionInputs(section, cb.checked);
-    });
+    if (cb && section) {
+      cb.addEventListener("change", () => {
+        section.querySelectorAll("input, textarea, select, button").forEach(el => {
+          if (el === cb) return;
+          el.disabled = cb.checked;
+        });
+      });
+    }
   });
 
   // ------------------------------------------------------------
-  // フォームデータ → JSON変換
+  // JSON変換ヘルパー
   // ------------------------------------------------------------
-  const formToJSON = (form) => {
-    const pv = [...purposesWrap.querySelectorAll(".uk-grid-small")].map(r => {
-      const g = k => getInputValue(r.querySelector(`[data-k="${k}"]`));
-      return { category: g("category"), target: g("target"), description: g("description") };
-    }).filter(p => p.category || p.target || p.description);
+  const getInputValue = (el) => el?.value.trim() || "";
+  const getVal = (form, n) => getInputValue(form.querySelector(`[name="${CSS.escape(n)}"]`));
+  const getBool = (form, n) => !!form.querySelector(`[name="${CSS.escape(n)}"]`)?.checked;
+  const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
 
-    const tools = [...analyticsWrap.querySelectorAll(".uk-grid-small")].map(r => {
-      const g = k => getInputValue(r.querySelector(`[data-k="${k}"]`));
-      return { name: g("name"), provider: g("provider"), purpose: g("purpose"), optoutUrl: g("optoutUrl") };
-    }).filter(t => t.name);
+  const formToJSON = (form) => {
+    const pv = [...purposesWrap.querySelectorAll(".uk-grid-small")].map(r => ({
+      category: getInputValue(r.querySelector(`[data-k="category"]`)),
+      target: getInputValue(r.querySelector(`[data-k="target"]`)),
+      description: getInputValue(r.querySelector(`[data-k="description"]`))
+    })).filter(p => p.category || p.target || p.description);
+
+    const tools = [...analyticsWrap.querySelectorAll(".uk-grid-small")].map(r => ({
+      name: getInputValue(r.querySelector(`[data-k="name"]`)),
+      provider: getInputValue(r.querySelector(`[data-k="provider"]`)),
+      purpose: getInputValue(r.querySelector(`[data-k="purpose"]`)),
+      optoutUrl: getInputValue(r.querySelector(`[data-k="optoutUrl"]`))
+    })).filter(t => t.name);
 
     return {
       base: {
@@ -152,14 +107,11 @@
       purposes: pv,
       purposesFlag: getBool(form, "purposes.noPurpose"),
       thirdParties: {
-        hasProvision: getBool(form, "thirdParties.hasProvision"),
         detail: getVal(form, "thirdParties.detail"),
-        entrustsProcessing: getBool(form, "thirdParties.entrustsProcessing"),
         entrustExamples: toList(getVal(form, "thirdParties.entrustExamples")),
         noThirdparty: getBool(form, "thirdParties.noThirdparty")
       },
       analytics: {
-        useAnalytics: getBool(form, "analytics.useAnalytics"),
         noAnalytics: getBool(form, "analytics.noAnalytics"),
         tools
       },
@@ -184,40 +136,29 @@
   };
 
   // ------------------------------------------------------------
-  // HTMLプレビュー生成とダウンロード機能
+  // HTML生成処理
   // ------------------------------------------------------------
   const preview = $("#preview");
   const dlBtn = $("#downloadBtn");
 
   $("#policyForm").addEventListener("submit", async e => {
     e.preventDefault();
-    dlBtn.disabled = true;
+    const json = formToJSON(e.target);
 
-    const form = e.currentTarget;
-    const json = formToJSON(form);
+    try {
+      const res = await fetch("/api/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(json)
+      });
 
-    const res = await fetch("/api/generate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(json)
-    });
-
-    const html = await res.text();
-    preview.innerHTML = html;
-
-    const blob = new Blob([html], { type: "text/html;charset=utf-8" });
-    const url = URL.createObjectURL(blob);
-
-    dlBtn.disabled = false;
-    dlBtn.onclick = () => {
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "privacy-policy.html";
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
-    };
+      const html = await res.text();
+      preview.innerHTML = html;
+      dlBtn.disabled = false;
+    } catch (err) {
+      preview.innerHTML = `<p class="uk-text-danger">エラーが発生しました。サーバーを確認してください。</p>`;
+      console.error(err);
+    }
   });
 
 })();

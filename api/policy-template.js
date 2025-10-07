@@ -5,7 +5,7 @@
 //       プライバシーポリシーHTML本文を生成する。
 // 特徴: 未入力の項目に「（※要修正※）」を自動表示し、
 //       UIkitの uk-alert-danger で赤背景警告を出す。
-//       また、各セクションで「該当なし」チェック時は出力を省略する。
+//       各セクションで「該当なし」チェック時は出力を省略。
 // 注意: 入力データは保存せず、レスポンス生成後に破棄。
 // ============================================================
 
@@ -37,7 +37,7 @@ export function buildPolicyHTML(data) {
   const site = cleanInput(base.siteName, "サイト名未設定");
   const operator = cleanInput(base.operatorName, "運営者名未設定");
   const email = cleanInput(base.contactEmail, "メールアドレス未設定");
-  const date = cleanInput(base.establishedDate, "制定日未設定");
+  const date = cleanInput(data.legal?.effectiveDate, "施行日未設定");
 
   // HTMLセクション変数
   let sectionCollection = "";
@@ -47,77 +47,108 @@ export function buildPolicyHTML(data) {
   let sectionCookies = "";
 
   // ------------------------------------------------------------
-  // 個人情報の取得方法（該当なしでない場合のみ出力）
+  // 個人情報の取得方法
   // ------------------------------------------------------------
   if (!data.collection?.noCollection) {
+    const methods = (data.collection.methods || []).join("、") || "（※要修正※）取得方法未入力";
+    const auto = (data.collection.autoCollection || []).join("、") || "（※要修正※）自動取得情報未入力";
+    const detail = cleanInput(data.collection.detail, "補足説明未入力（例：Cookieを使用しています）");
+
     sectionCollection = `
     <section class="uk-section-xsmall">
       <h3 class="uk-heading-bullet">個人情報の取得方法</h3>
       <p>
-        当サイトでは、お問い合わせフォームなどを通じて、利用者から個人情報を取得する場合があります。
-        また、自動的に取得される情報として、アクセスログやCookie情報を取得します。
+        当サイトでは、${methods}などの方法で個人情報を取得する場合があります。<br>
+        また、自動的に取得される情報として、${auto}等が含まれます。<br>
+        ${detail}
       </p>
     </section>`;
   }
 
   // ------------------------------------------------------------
-  // 利用目的（該当なしでない場合のみ出力）
+  // 利用目的
   // ------------------------------------------------------------
   if (!data.purposesFlag) {
-    const purposeText = cleanInput(data.purpose, "利用目的未記入（例：お問い合わせ対応・サービス改善のため）");
+    const purposes = (data.purposes || []).map((p) => {
+      const cat = p.category || "";
+      const tgt = p.target || "";
+      const desc = p.description || "";
+      return `<li>${cat}${tgt ? `（${tgt}）` : ""}：${desc}</li>`;
+    });
+
+    const content = purposes.length
+      ? `<ul>${purposes.join("")}</ul>`
+      : `<div class="uk-alert-danger" uk-alert>（※要修正※）利用目的未入力</div>`;
+
     sectionPurposes = `
     <section class="uk-section-xsmall">
       <h3 class="uk-heading-bullet">個人情報の利用目的</h3>
-      <p>${purposeText}</p>
+      <p>当サイトが取得した個人情報は、以下の目的のために利用いたします。</p>
+      ${content}
     </section>`;
   }
 
   // ------------------------------------------------------------
-  // 第三者提供・委託（該当なしでない場合のみ出力）
+  // 第三者提供・委託
   // ------------------------------------------------------------
   if (!data.thirdParties?.noThirdparty) {
-    const delegate = cleanInput(data.delegation, "委託先情報未記入（例：サーバー管理会社など）");
+    const detail = cleanInput(data.thirdParties.detail, "委託・提供に関する説明未入力");
+    const examples = (data.thirdParties.entrustExamples || []).join("、");
+
     sectionThird = `
     <section class="uk-section-xsmall">
       <h3 class="uk-heading-bullet">個人情報の第三者提供および委託</h3>
       <p>
-        当サイトでは、法令に基づく場合を除き、第三者への個人情報の提供は行いません。
-        ${delegate}
+        当サイトでは、法令に基づく場合を除き、第三者への個人情報の提供は行いません。<br>
+        ${detail}
+        ${examples ? `<br>主な委託先の例：${examples}` : ""}
       </p>
     </section>`;
   }
 
   // ------------------------------------------------------------
-  // アクセス解析（該当なしでない場合のみ出力）
+  // アクセス解析
   // ------------------------------------------------------------
   if (!data.analytics?.noAnalytics) {
-    const tool = cleanInput(data.analyticsTool, "アクセス解析ツール未記入（例：Google Analytics 4）");
+    const tools = (data.analytics.tools || []).map((t) => {
+      const name = cleanInput(t.name, "ツール名未入力");
+      const provider = t.provider ? `（提供者：${t.provider}）` : "";
+      const purpose = t.purpose || "目的未記入";
+      const optout = t.optoutUrl ? `<br>オプトアウトURL：<a href="${t.optoutUrl}" target="_blank">${t.optoutUrl}</a>` : "";
+      return `<li>${name}${provider}：${purpose}${optout}</li>`;
+    });
+
+    const content = tools.length
+      ? `<ul>${tools.join("")}</ul>`
+      : `<div class="uk-alert-danger" uk-alert>（※要修正※）解析ツール未入力</div>`;
+
     sectionAnalytics = `
     <section class="uk-section-xsmall">
       <h3 class="uk-heading-bullet">アクセス解析ツールの使用</h3>
-      <p>
-        当サイトでは、${tool} を利用しています。
-        これにより収集されるデータは匿名であり、個人を特定するものではありません。
-      </p>
+      <p>当サイトでは、以下のアクセス解析ツールを利用しています。</p>
+      ${content}
     </section>`;
   }
 
   // ------------------------------------------------------------
-  // Cookie（該当なしでない場合のみ出力）
+  // Cookie
   // ------------------------------------------------------------
   if (!data.cookies?.noCookies) {
+    const purposes = (data.cookies.purposes || []).join("、") || "（※要修正※）Cookie使用目的未入力";
+    const disable = cleanInput(data.cookies.disableMethod, "無効化方法未入力");
+
     sectionCookies = `
     <section class="uk-section-xsmall">
       <h3 class="uk-heading-bullet">Cookie（クッキー）の使用について</h3>
       <p>
-        当サイトでは、利便性の向上やアクセス解析の目的でCookieを使用しています。
-        Cookieの無効化は、各ブラウザの設定画面から行うことができます。
+        当サイトでは、${purposes}の目的でCookieを使用しています。<br>
+        ${disable}
       </p>
     </section>`;
   }
 
   // ------------------------------------------------------------
-  // 開示請求の連絡先
+  // 開示請求・連絡先
   // ------------------------------------------------------------
   let contactOutput = "";
   if (userRights.contact || userRights.phone) {
@@ -143,8 +174,8 @@ export function buildPolicyHTML(data) {
 
   ${sectionCollection}
   ${sectionPurposes}
-  ${sectionAnalytics}
   ${sectionThird}
+  ${sectionAnalytics}
   ${sectionCookies}
 
   <section class="uk-section-xsmall">
