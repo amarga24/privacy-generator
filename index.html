@@ -1,330 +1,196 @@
-<!--
-  index.html：入力フォーム画面。UIkitを用いてプレビューとダウンロードを提供する。
-  目的：フォーム入力 → /api/generate へJSON送信 → 受信HTMLを右ペインに表示・保存。
-  注意：入力は保存しない。実在の個人情報を入れない。代表者の例は汎用名を使用。
--->
 <!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="utf-8" />
-  <title>プライバシーポリシー生成ツール</title>
+  <title>プライバシーポリシージェネレーター</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- UIkit CSS（UIコンポーネント用） -->
+  <!-- UIkit CSS -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/css/uikit.min.css" />
 
   <style>
-    /* 画面全体の基本レイアウト */
-    body { background: #f7f8fa; }
-    .app-wrap { max-width: 1200px; margin: 24px auto; }
-    .pill { display:inline-block; padding:4px 8px; background:#eef4ff; border:1px solid #b8c6ff; border-radius:999px; font-size:12px; margin-right:6px; }
-    .muted { color:#666; }
-    iframe#preview { width:100%; height:70vh; border:1px solid #eee; border-radius:6px; }
+    body { background: #f8f9fb; }
+    .app-wrap { padding: 32px 16px; }
+    .required-label { color: #e60033; font-size: .8em; margin-left: 4px; }
+    .section-desc { color: #666; font-size: .9em; margin-top: -4px; margin-bottom: 12px; }
+    ::placeholder { color: #999; }
+    .icon-heading { display: flex; align-items: center; gap: 8px; font-weight: 600; line-height: 1.3; margin-top: 32px; }
+    .icon-heading [uk-icon] svg { vertical-align: middle; position: relative; top: -1px; }
   </style>
 </head>
+
 <body>
-<div class="app-wrap uk-container">
-  <h1 class="uk-heading-line"><span>🧩 Web Privacy Policy Generator（for Japan）</span></h1>
-  <p class="uk-text-small muted">入力は保存されません。生成結果は右のプレビューに表示されます。</p>
 
-  <div class="uk-grid-small" uk-grid>
-    <!-- 左ペイン：フォーム -->
-    <div class="uk-width-1-1 uk-width-2-5@m">
-      <!--
-        フォーム：入力値はJavaScriptでJSONへ変換し、/api/generate にPOSTする。
-        requiredは最低限のみ。カンマ区切り項目は配列へ整形。
-      -->
-      <form id="policyForm" class="uk-form-stacked uk-card uk-card-default uk-card-body uk-box-shadow-small">
-        <h3 class="uk-card-title">基本情報</h3>
-        <div class="uk-margin">
-          <label class="uk-form-label">サイト名</label>
-          <div class="uk-form-controls">
-            <input class="uk-input" name="base.siteName" placeholder="例：Example Site" required>
-          </div>
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">運営者名</label>
-          <input class="uk-input" name="base.operatorName" placeholder="例：Example Corp." required>
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">代表者名</label>
-          <!-- 実名は使わず、汎用的な例を使用する -->
-          <input class="uk-input" name="base.representative" placeholder="例：サイト運営代表者">
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">お問い合わせメール</label>
-          <input class="uk-input" name="base.contactEmail" type="email" placeholder="info@example.com" required>
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">住所</label>
-          <textarea class="uk-textarea" name="base.address" rows="2" placeholder="例：東京都〇〇区〇〇1-2-3"></textarea>
-        </div>
+<div class="uk-container app-wrap">
+  <h1 class="uk-heading-divider">Web Privacy Policy Generator</h1>
+  <p class="uk-text-small uk-text-muted">
+    入力内容は保存されません。「生成する」を押すと下部にHTMLがプレビューされます。
+  </p>
 
-        <hr>
+  <form id="policyForm" class="uk-form-stacked uk-card uk-card-default uk-card-body uk-box-shadow-small">
 
-        <h3>取得方法</h3>
-        <div class="uk-margin">
-          <label class="uk-form-label">手動取得（カンマ区切り）</label>
-          <input class="uk-input" name="collection.methods" placeholder="お問い合わせフォーム, メルマガ登録">
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">自動取得（カンマ区切り）</label>
-          <input class="uk-input" name="collection.autoCollection" placeholder="Cookie, アクセスログ">
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">補足説明</label>
-          <textarea class="uk-textarea" name="collection.detail" rows="2" placeholder="例：アクセス解析のためCookieを使用します。"></textarea>
-        </div>
-
-        <hr>
-
-        <h3>利用目的 <span class="pill">＋追加可能</span></h3>
-        <div id="purposesWrap"></div>
-        <button class="uk-button uk-button-default uk-margin-small" type="button" id="addPurpose">＋ 目的を追加</button>
-
-        <hr>
-
-        <h3>第三者提供・委託</h3>
-        <div class="uk-margin">
-          <label><input class="uk-checkbox" type="checkbox" name="thirdParties.hasProvision"> 第三者提供あり</label>
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">第三者提供の説明</label>
-          <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者へ提供しません。"></textarea>
-        </div>
-        <div class="uk-margin">
-          <label><input class="uk-checkbox" type="checkbox" name="thirdParties.entrustsProcessing" checked> 委託あり</label>
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">委託先の例（カンマ区切り）</label>
-          <input class="uk-input" name="thirdParties.entrustExamples" placeholder="サーバー運営会社, 決済代行業者">
-        </div>
-
-        <hr>
-
-        <h3>アクセス解析</h3>
-        <div class="uk-margin">
-          <label><input class="uk-checkbox" type="checkbox" name="analytics.useAnalytics" checked> 利用する</label>
-        </div>
-        <div id="analyticsWrap"></div>
-        <button class="uk-button uk-button-default uk-margin-small" type="button" id="addAnalytics">＋ 解析ツールを追加</button>
-
-        <hr>
-
-        <h3>Cookie</h3>
-        <div class="uk-margin">
-          <label><input class="uk-checkbox" type="checkbox" name="cookies.useCookies" checked> Cookieを利用する</label>
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">Cookieの目的（カンマ区切り）</label>
-          <input class="uk-input" name="cookies.purposes" placeholder="利便性向上, アクセス解析, 広告配信">
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">無効化方法</label>
-          <input class="uk-input" name="cookies.disableMethod" placeholder="ブラウザ設定で無効化可能">
-        </div>
-
-        <hr>
-
-        <h3>管理体制</h3>
-        <div class="uk-margin">
-          <label class="uk-form-label">対策（カンマ区切り）</label>
-          <input class="uk-input" name="security.measures" placeholder="SSL/TLSによる通信暗号化, アクセス権限の制限, 定期的な見直しと更新">
-        </div>
-
-        <hr>
-
-        <h3>開示等の請求</h3>
-        <div class="uk-margin">
-          <label class="uk-form-label">連絡先メール</label>
-          <input class="uk-input" name="userRights.contact" placeholder="info@example.com">
-        </div>
-        <div class="uk-margin">
-          <label class="uk-form-label">手続き</label>
-          <textarea class="uk-textarea" name="userRights.procedure" rows="2" placeholder="本人確認のうえ、合理的な期間内に対応します。"></textarea>
-        </div>
-
-        <hr>
-
-        <h3>法的情報</h3>
-        <div class="uk-grid-small" uk-grid>
-          <div class="uk-width-1-2">
-            <label class="uk-form-label">発効日</label>
-            <input class="uk-input" type="date" name="legal.effectiveDate">
-          </div>
-          <div class="uk-width-1-2">
-            <label class="uk-form-label">準拠法</label>
-            <input class="uk-input" name="legal.governingLaw" placeholder="日本法" value="日本法">
-          </div>
-        </div>
-
-        <div class="uk-margin">
-          <button class="uk-button uk-button-primary" type="submit">生成する</button>
-          <button class="uk-button uk-button-default" type="button" id="downloadBtn" disabled>HTMLをダウンロード</button>
-        </div>
-      </form>
+    <!-- 基本情報 -->
+    <h3 class="icon-heading"><span uk-icon="user" ratio="1.2"></span> 基本情報</h3>
+    <p class="section-desc">サイトや運営者の基本情報を入力してください。</p>
+    <div class="uk-margin">
+      <label class="uk-form-label">サイト名 <span class="required-label">※必須</span></label>
+      <input class="uk-input" name="base.siteName" placeholder="Web Privacy Guide" required>
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">運営者名 <span class="required-label">※必須</span></label>
+      <input class="uk-input" name="base.operatorName" placeholder="株式会社サンプル" required>
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">代表者名</label>
+      <input class="uk-input" name="base.representative" placeholder="代表取締役 山田太郎">
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">お問い合わせメール <span class="required-label">※必須</span></label>
+      <input class="uk-input" type="email" name="base.contactEmail" placeholder="info@sample-desu.co.jp" required>
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">住所</label>
+      <textarea class="uk-textarea" name="base.address" rows="2" placeholder="東京都港区赤坂1-1-1"></textarea>
     </div>
 
-    <!-- 右ペイン：プレビュー -->
-    <div class="uk-width-1-1 uk-width-3-5@m">
-      <div class="uk-card uk-card-default uk-card-body uk-box-shadow-small">
-        <h3 class="uk-card-title">プレビュー</h3>
-        <iframe id="preview"></iframe>
-        <p class="uk-text-small muted uk-margin-small-top">※ このプレビューは生成HTMLをそのまま表示。</p>
+    <hr>
+
+    <!-- 個人情報の取得方法 -->
+    <h3 class="icon-heading"><span uk-icon="lock" ratio="1.2"></span> 個人情報の取得方法</h3>
+    <p class="section-desc">どのような方法で個人情報を取得しているかを入力してください。</p>
+    <div class="uk-margin">
+      <label class="uk-form-label">ユーザー入力による取得</label>
+      <input class="uk-input" name="collection.methods" placeholder="お問い合わせフォーム, 会員登録フォーム">
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">自動取得される情報</label>
+      <input class="uk-input" name="collection.autoCollection" placeholder="アクセスログ, Cookie, IPアドレス">
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">補足説明</label>
+      <textarea class="uk-textarea" name="collection.detail" rows="2" placeholder="利用状況分析のためCookieを使用しています。"></textarea>
+    </div>
+
+    <hr>
+
+    <!-- 利用目的 -->
+    <h3 class="icon-heading"><span uk-icon="list" ratio="1.2"></span> 利用目的</h3>
+    <p class="section-desc">取得した情報をどのように利用するかを入力してください。</p>
+    <p class="uk-text-meta">例：株式会社サンプルは、お客様情報を商品発送およびお問い合わせ対応のために利用します。</p>
+    <div id="purposesWrap"></div>
+    <button class="uk-button uk-button-default uk-margin-small" type="button" id="addPurpose">＋ 目的を追加</button>
+
+    <hr>
+
+    <!-- 第三者提供・委託 -->
+    <h3 class="icon-heading"><span uk-icon="users" ratio="1.2"></span> 第三者提供・委託</h3>
+    <p class="section-desc">個人情報を第三者に提供または外部に委託する場合に入力してください。</p>
+    <div class="uk-margin">
+      <label><input class="uk-checkbox" type="checkbox" name="thirdParties.hasProvision"> 第三者提供あり</label>
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">第三者提供の説明</label>
+      <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者へ提供しません。"></textarea>
+    </div>
+    <div class="uk-margin">
+      <label><input class="uk-checkbox" type="checkbox" name="thirdParties.entrustsProcessing" checked> 委託あり</label>
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">委託先の例</label>
+      <input class="uk-input" name="thirdParties.entrustExamples" placeholder="サーバー会社, 決済代行業者">
+    </div>
+
+    <hr>
+
+    <!-- アクセス解析 -->
+    <h3 class="icon-heading"><span uk-icon="search" ratio="1.2"></span> アクセス解析</h3>
+    <p class="section-desc">利用しているアクセス解析ツールを入力してください。</p>
+    <div class="uk-margin">
+      <label><input class="uk-checkbox" type="checkbox" name="analytics.useAnalytics" checked> 利用する</label>
+    </div>
+    <div id="analyticsWrap"></div>
+    <button class="uk-button uk-button-default uk-margin-small" type="button" id="addAnalytics">＋ 解析ツールを追加</button>
+
+    <hr>
+
+    <!-- Cookie -->
+    <h3 class="icon-heading"><span uk-icon="database" ratio="1.2"></span> Cookie</h3>
+    <p class="section-desc">Cookieの使用目的や無効化方法を入力してください。</p>
+    <div class="uk-margin">
+      <label class="uk-form-label">使用目的</label>
+      <input class="uk-input" name="cookies.purposes" placeholder="利便性向上, アクセス解析, 広告配信">
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">無効化方法</label>
+      <input class="uk-input" name="cookies.disableMethod" placeholder="ブラウザ設定からCookieを無効化できます。">
+    </div>
+
+    <hr>
+
+    <!-- 管理体制 -->
+    <h3 class="icon-heading"><span uk-icon="shield" ratio="1.2"></span> 管理体制</h3>
+    <p class="section-desc">個人情報保護のために講じている対策を入力してください。</p>
+    <div class="uk-margin">
+      <input class="uk-input" name="security.measures" placeholder="SSL/TLS通信暗号化, アクセス制御, 定期的な見直し">
+    </div>
+
+    <hr>
+
+    <!-- 開示等の請求 -->
+    <h3 class="icon-heading"><span uk-icon="mail" ratio="1.2"></span> 開示等の請求</h3>
+    <p class="section-desc">開示・訂正・削除などの請求連絡先を入力してください。</p>
+    <div class="uk-margin">
+      <label class="uk-form-label">連絡先メール</label>
+      <input class="uk-input" name="userRights.contact" placeholder="info@sample-desu.co.jp">
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">電話番号</label>
+      <input class="uk-input" name="userRights.phone" placeholder="03-0000-0000">
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">住所</label>
+      <textarea class="uk-textarea" name="userRights.address" rows="2" placeholder="東京都港区赤坂1-1-1 株式会社サンプル宛"></textarea>
+    </div>
+    <div class="uk-margin">
+      <label class="uk-form-label">手続きの流れ</label>
+      <textarea class="uk-textarea" name="userRights.procedure" rows="2" placeholder="本人確認の上、速やかに対応いたします（通常1週間以内）。"></textarea>
+    </div>
+
+    <hr>
+
+    <!-- 法的情報 -->
+    <h3 class="icon-heading"><span uk-icon="file-edit" ratio="1.2"></span> 法的情報</h3>
+    <div class="uk-grid-small" uk-grid>
+      <div class="uk-width-1-2@s">
+        <label class="uk-form-label">発効日</label>
+        <input class="uk-input" type="date" name="legal.effectiveDate">
+      </div>
+      <div class="uk-width-1-2@s">
+        <label class="uk-form-label">準拠法</label><br>
+        <label><input class="uk-checkbox" type="checkbox" name="legal.governingLaw" value="日本法" checked> 日本法に基づく</label>
       </div>
     </div>
+
+    <div class="uk-margin">
+      <button class="uk-button uk-button-primary" type="submit">生成する</button>
+      <button class="uk-button uk-button-default" type="button" id="downloadBtn" disabled>HTMLをダウンロード</button>
+    </div>
+
+  </form>
+
+  <div class="uk-card uk-card-default uk-card-body uk-box-shadow-small uk-margin-large-top">
+    <h3 class="icon-heading"><span uk-icon="eye" ratio="1.2"></span> プレビュー</h3>
+    <div id="preview" class="uk-margin-small-top uk-padding-small uk-background-default uk-overflow-auto"></div>
+    <p class="uk-text-small uk-text-muted uk-margin-small-top">※ 入力内容に基づいて生成されたHTMLをリアルタイムで表示します。</p>
   </div>
 </div>
 
-<!-- UIkit JS（UI動作用） -->
+<!-- UIkit JS -->
 <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/js/uikit-icons.min.js"></script>
 
-<script>
-/*
-  このスクリプトの役割：
-  1) 「利用目的」「解析ツール」の行を動的に追加
-  2) フォーム値をJSONへ整形
-  3) /api/generate にPOSTし、返却HTMLをiframeへ描画
-  4) 同じHTMLをBlobとしてダウンロード可能にする
-*/
-(function(){
-  const $ = sel => document.querySelector(sel);
-  const createEl = (html) => { const t = document.createElement('template'); t.innerHTML = html.trim(); return t.content.firstChild; };
+<!-- メインスクリプト -->
+<script src="script.js" defer></script>
 
-  // --- 利用目的の動的行 ---
-  const purposesWrap = $('#purposesWrap');
-  const addPurposeRow = (c="", t="", d="") => {
-    purposesWrap.appendChild(createEl(`
-      <div class="uk-grid-small uk-margin-small" uk-grid>
-        <div class="uk-width-1-3"><input class="uk-input" placeholder="カテゴリ" data-k="category" value="${c}"></div>
-        <div class="uk-width-1-3"><input class="uk-input" placeholder="対象" data-k="target" value="${t}"></div>
-        <div class="uk-width-1-3"><input class="uk-input" placeholder="説明" data-k="description" value="${d}"></div>
-      </div>
-    `));
-  };
-  $('#addPurpose').addEventListener('click', () => addPurposeRow());
-  // 初期1行
-  addPurposeRow("サービス提供","利用者","お問い合わせへの回答および依頼対応");
-
-  // --- アクセス解析の動的行 ---
-  const analyticsWrap = $('#analyticsWrap');
-  const addAnalyticsRow = (name="", provider="", purpose="", optout="") => {
-    analyticsWrap.appendChild(createEl(`
-      <div class="uk-margin-small uk-grid-small" uk-grid>
-        <div class="uk-width-1-4"><input class="uk-input" placeholder="ツール名" data-k="name" value="${name}"></div>
-        <div class="uk-width-1-4"><input class="uk-input" placeholder="提供者" data-k="provider" value="${provider}"></div>
-        <div class="uk-width-1-4"><input class="uk-input" placeholder="目的" data-k="purpose" value="${purpose}"></div>
-        <div class="uk-width-1-4"><input class="uk-input" placeholder="オプトアウトURL" data-k="optoutUrl" value="${optout}"></div>
-      </div>
-    `));
-  };
-  $('#addAnalytics').addEventListener('click', () => addAnalyticsRow());
-  // 初期例
-  addAnalyticsRow("Google Analytics","Google LLC","サイト利用状況の分析","https://tools.google.com/dlpage/gaoptout");
-
-  // 文字列→配列（カンマ区切りを分割）
-  const toList = (str) => (str||"").split(",").map(s=>s.trim()).filter(Boolean);
-
-  // --- フォーム値をJSONへまとめる ---
-  function formToJSON(form){
-    const get = name => form.querySelector(`[name="${name}"]`);
-    const getVal = name => (get(name)?.value || "").trim();
-    const getBool = name => !!get(name)?.checked;
-
-    // 利用目的（動的行）
-    const pv = [...purposesWrap.querySelectorAll('.uk-grid-small')].map(row=>{
-      const g = k => row.querySelector(`[data-k="${k}"]`)?.value.trim() || "";
-      if(!g('category') && !g('target') && !g('description')) return null;
-      return { category:g('category'), target:g('target'), description:g('description') };
-    }).filter(Boolean);
-
-    // アクセス解析ツール（動的行）
-    const tools = [...analyticsWrap.querySelectorAll('.uk-grid-small')].map(row=>{
-      const g = k => row.querySelector(`[data-k="${k}"]`)?.value.trim() || "";
-      if(!g('name')) return null;
-      return { name:g('name'), provider:g('provider'), purpose:g('purpose'), optoutUrl:g('optoutUrl') };
-    }).filter(Boolean);
-
-    return {
-      base: {
-        siteName: getVal('base.siteName'),
-        operatorName: getVal('base.operatorName'),
-        contactEmail: getVal('base.contactEmail'),
-        address: getVal('base.address'),
-        representative: getVal('base.representative')
-      },
-      collection: {
-        methods: toList(getVal('collection.methods')),
-        autoCollection: toList(getVal('collection.autoCollection')),
-        detail: getVal('collection.detail')
-      },
-      purposes: pv,
-      thirdParties: {
-        hasProvision: getBool('thirdParties.hasProvision'),
-        detail: getVal('thirdParties.detail') || "法令に基づく場合を除き、第三者へ提供しません。",
-        entrustsProcessing: getBool('thirdParties.entrustsProcessing'),
-        entrustExamples: toList(getVal('thirdParties.entrustExamples'))
-      },
-      analytics: {
-        useAnalytics: getBool('analytics.useAnalytics'),
-        tools
-      },
-      cookies: {
-        useCookies: getBool('cookies.useCookies'),
-        purposes: toList(getVal('cookies.purposes')),
-        disableMethod: getVal('cookies.disableMethod') || "ブラウザ設定で無効化可能"
-      },
-      security: {
-        measures: toList(getVal('security.measures'))
-      },
-      userRights: {
-        contact: getVal('userRights.contact') || getVal('base.contactEmail'),
-        procedure: getVal('userRights.procedure') || "本人確認のうえ、合理的な期間内に対応します。"
-      },
-      legal: {
-        effectiveDate: getVal('legal.effectiveDate') || new Date().toISOString().slice(0,10),
-        governingLaw: getVal('legal.governingLaw') || "日本法"
-      }
-    };
-  }
-
-  // --- 送信処理：/api/generate へPOSTし、プレビューとDLを準備 ---
-  const preview = $('#preview');
-  const dlBtn = $('#downloadBtn');
-
-  $('#policyForm').addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    dlBtn.disabled = true;
-
-    const json = formToJSON(e.currentTarget);
-
-    // API呼び出し（/api/generate へJSONを送信）
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify(json)
-    });
-
-    // 返却HTMLを受け取る
-    const html = await res.text();
-
-    // プレビューへ描画（iframeに直接HTMLを書き込む）
-    const doc = preview.contentDocument || preview.contentWindow.document;
-    doc.open(); doc.write(html); doc.close();
-
-    // ダウンロードボタンの有効化（Blobにして保存）
-    const blob = new Blob([html], {type:'text/html;charset=utf-8'});
-    const url = URL.createObjectURL(blob);
-    dlBtn.disabled = false;
-    dlBtn.onclick = () => {
-      const a = document.createElement('a');
-      a.href = url; a.download = 'privacy-policy.html';
-      document.body.appendChild(a); a.click(); a.remove();
-      setTimeout(()=> URL.revokeObjectURL(url), 1500);
-    };
-  });
-})();
-</script>
 </body>
 </html>

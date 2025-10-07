@@ -1,0 +1,13 @@
+﻿# Node.js dependencies
+node_modules/
+npm-debug.log
+
+# Build artifacts
+.vercel
+.env
+.DS_Store
+
+# Local-only files（ローカル開発専用ファイル）
+server-local.js
+api/policy-template-local.js
+_old/
