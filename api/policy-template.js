@@ -50,20 +50,38 @@ export function buildPolicyHTML(data) {
   // 個人情報の取得方法
   // ------------------------------------------------------------
   if (!data.collection?.noCollection) {
-    const methods = (data.collection.methods || []).join("、") || "（※要修正※）取得方法未入力";
-    const auto = (data.collection.autoCollection || []).join("、") || "（※要修正※）自動取得情報未入力";
-    const detail = cleanInput(data.collection.detail, "補足説明未入力（例：Cookieを使用しています）");
+    // 空欄時に赤警告＋例文を出す
+    const withPlaceholder = (val, placeholder) => {
+      if (val && String(val).trim() !== "") return String(val).trim();
+      return `<div class="uk-alert-danger" uk-alert>（※要修正※）${placeholder}</div>`;
+    };
 
+    // 各項目を整形
+    const methods = withPlaceholder(
+      (data.collection.methods || []).join("、"),
+      "ユーザー入力による取得（例：お問い合わせフォーム、会員登録など）"
+    );
+
+    const auto = withPlaceholder(
+      (data.collection.autoCollection || []).join("、"),
+      "自動取得される情報（例：アクセスログ、Cookie、IPアドレスなど）"
+    );
+
+    const detail = withPlaceholder(
+      data.collection.detail,
+      "補足説明（例：これらの情報はサービス提供や不正防止のために利用）"
+    );
+
+    // 出力（見出しは変更しない）
     sectionCollection = `
-    <section class="uk-section-xsmall">
-      <h3 class="uk-heading-bullet">個人情報の取得方法</h3>
-      <p>
-        当サイトでは、${methods}などの方法で個人情報を取得する場合があります。<br>
-        また、自動的に取得される情報として、${auto}等が含まれます。<br>
-        ${detail}
-      </p>
-    </section>`;
+  <section class="uk-section-xsmall">
+    <h3 class="uk-heading-bullet">個人情報の取得方法</h3>
+    <p><strong>ユーザー入力による取得：</strong><br>${methods}</p>
+    <p><strong>自動取得される情報：</strong><br>${auto}</p>
+    <p><strong>補足説明：</strong><br>${detail}</p>
+  </section>`;
   }
+
 
   // ------------------------------------------------------------
   // 利用目的
