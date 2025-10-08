@@ -1,4 +1,4 @@
-﻿﻿// ============================================================
+﻿// ============================================================
 // api/policy-template.js
 // ------------------------------------------------------------
 // 概要: 入力データ（フォーム内容）を受け取り、
@@ -100,20 +100,21 @@ export function buildPolicyHTML(data) {
   if (data.thirdParties?.noThirdparty !== true) {
     const detail = withPlaceholder(
       data.thirdParties?.detail,
-      "委託・提供に関する説明未入力"
+      "第三者提供・委託に関する説明（例：法令に基づく場合を除き、第三者への提供および委託は行いません。）"
     );
+
     const examples = (data.thirdParties?.entrustExamples || []).join("、");
 
     sectionThird = `
-    <section class="uk-section-xsmall">
-      <h3 class="uk-heading-bullet">個人情報の第三者提供および委託</h3>
-      <p>
-        当サイトでは、法令に基づく場合を除き、第三者への個人情報の提供は行いません。<br>
-        ${detail}
-        ${examples ? `<br>主な委託先の例：${escapeHTML(examples)}` : ""}
-      </p>
-    </section>`;
+  <section class="uk-section-xsmall">
+    <h3 class="uk-heading-bullet">個人情報の第三者提供および委託</h3>
+    <p>
+      ${detail}<br>
+      ${examples ? `主な委託先の例：${escapeHTML(examples)}` : ""}
+    </p>
+  </section>`;
   }
+
 
   // ============================================================
   // ④ アクセス解析
@@ -126,8 +127,8 @@ export function buildPolicyHTML(data) {
       const purpose = withPlaceholder(t.purpose, "目的未入力");
       const optout = t.optoutUrl
         ? `<br>オプトアウトURL：<a href="${escapeHTML(t.optoutUrl)}" target="_blank">${escapeHTML(
-            t.optoutUrl
-          )}</a>`
+          t.optoutUrl
+        )}</a>`
         : "";
       return `<li>${name}${provider}：${purpose}${optout}</li>`;
     });
