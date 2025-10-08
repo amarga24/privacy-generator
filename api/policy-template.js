@@ -39,12 +39,16 @@ export function buildPolicyHTML(data) {
 
   const site = withPlaceholder(base.siteName, "サイト名未設定");
   const operator = withPlaceholder(base.operatorName, "運営者名未設定");
+  const representative = base.representative
+    ? escapeHTML(base.representative)
+    : "";
+  const address = base.address ? escapeHTML(base.address) : "";
   const email = withPlaceholder(base.contactEmail, "メールアドレス未設定");
   const date = withPlaceholder(data.legal?.effectiveDate, "施行日未設定");
 
-  // ============================================================
-  // ① 個人情報の取得方法
-  // ============================================================
+  // ------------------------------------------------------------
+  // 個人情報の取得方法
+  // ------------------------------------------------------------
   let sectionCollection = "";
   if (data.collection?.noCollection !== true) {
     const methods = withPlaceholder(
@@ -69,9 +73,9 @@ export function buildPolicyHTML(data) {
     </section>`;
   }
 
-  // ============================================================
-  // ② 利用目的
-  // ============================================================
+  // ------------------------------------------------------------
+  // 個人情報の利用目的
+  // ------------------------------------------------------------
   let sectionPurposes = "";
   if (data.purposesFlag !== true) {
     const purposes = (data.purposes || []).map((p) => {
@@ -93,19 +97,15 @@ export function buildPolicyHTML(data) {
     </section>`;
   }
 
-  // ============================================================
-  // ③ 第三者提供・委託
-  // ============================================================
+  // ------------------------------------------------------------
+  // 第三者提供・委託
+  // ------------------------------------------------------------
   let sectionThird = "";
   if (data.thirdParties?.noThirdparty !== true) {
-
-    // 第三者提供・委託に関する説明
     const detail = withPlaceholder(
       data.thirdParties?.detail,
       "第三者提供・委託に関する説明（例：法令に基づく場合を除き、第三者への提供および委託は行いません。）"
     );
-
-    // 委託先の例
     const examples = withPlaceholder(
       (data.thirdParties?.entrustExamples || []).join("、"),
       "委託先の例（例：サーバー会社、決済代行業者など）"
@@ -119,11 +119,9 @@ export function buildPolicyHTML(data) {
   </section>`;
   }
 
-
-
-  // ============================================================
-  // ④ アクセス解析
-  // ============================================================
+  // ------------------------------------------------------------
+  // アクセス解析
+  // ------------------------------------------------------------
   let sectionAnalytics = "";
   if (data.analytics?.noAnalytics !== true) {
     const tools = (data.analytics?.tools || []).map((t) => {
@@ -132,8 +130,8 @@ export function buildPolicyHTML(data) {
       const purpose = withPlaceholder(t.purpose, "目的未入力");
       const optout = t.optoutUrl
         ? `<br>オプトアウトURL：<a href="${escapeHTML(t.optoutUrl)}" target="_blank">${escapeHTML(
-          t.optoutUrl
-        )}</a>`
+            t.optoutUrl
+          )}</a>`
         : "";
       return `<li>${name}${provider}：${purpose}${optout}</li>`;
     });
@@ -150,9 +148,9 @@ export function buildPolicyHTML(data) {
     </section>`;
   }
 
-  // ============================================================
-  // ⑤ Cookie
-  // ============================================================
+  // ------------------------------------------------------------
+  // Cookie
+  // ------------------------------------------------------------
   let sectionCookies = "";
   if (data.cookies?.noCookies !== true) {
     const purposes = withPlaceholder(
@@ -174,9 +172,9 @@ export function buildPolicyHTML(data) {
     </section>`;
   }
 
-  // ============================================================
-  // ⑥ 管理体制（該当なしチェックなし）
-  // ============================================================
+  // ------------------------------------------------------------
+  // 管理体制（該当なしチェックなし）
+  // ------------------------------------------------------------
   const securityText = withPlaceholder(
     (data.security?.measures || []).join("、"),
     "セキュリティ対策未入力（例：SSL/TLS通信暗号化、アクセス制御、定期的な見直し）"
@@ -187,9 +185,9 @@ export function buildPolicyHTML(data) {
     <p>${securityText}</p>
   </section>`;
 
-  // ============================================================
-  // ⑦ 開示・訂正・削除等の請求について
-  // ============================================================
+  // ------------------------------------------------------------
+  // 開示・訂正・削除等の請求について
+  // ------------------------------------------------------------
   let contactOutput = "";
   if (userRights.contact || userRights.phone) {
     contactOutput = `
@@ -200,16 +198,18 @@ export function buildPolicyHTML(data) {
     contactOutput = withPlaceholder("", "連絡先未設定（メールまたは電話番号のいずれかを入力）");
   }
 
-  // ============================================================
+  // ------------------------------------------------------------
   // HTML全体組み立て
-  // ============================================================
+  // ------------------------------------------------------------
   return `
 <article class="uk-article policy-content uk-margin-large-top">
 
   <h2 class="uk-heading-bullet">プライバシーポリシー</h2>
   <p>
-    本プライバシーポリシーは、${operator}（以下「当社」といいます。）が運営する
-    「${site}」（以下「本サイト」といいます。）における個人情報の取扱いについて定めるものです。
+    本プライバシーポリシーは、${operator}
+    ${representative ? `（代表者：${representative}）` : ""}
+    が運営する「${site}」（以下「本サイト」といいます。）における個人情報の取扱いについて定めるものです。
+    ${address ? `<br>所在地：${address}` : ""}
   </p>
 
   ${sectionCollection}
