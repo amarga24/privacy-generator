@@ -94,7 +94,6 @@
       base: {
         siteName: getVal(form, "base.siteName"),
         operatorName: getVal(form, "base.operatorName"),
-        contactEmail: getVal(form, "base.contactEmail"),
         address: getVal(form, "base.address"),
         representative: getVal(form, "base.representative")
       },
