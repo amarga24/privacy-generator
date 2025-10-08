@@ -10,6 +10,7 @@
 //  3. uk-alert-danger, uk-alert は使用しない。
 //  4. 管理体制セクションにはチェックボックスなし。
 //     未入力時は同様に赤字＋プレースホルダーを出力。
+//  5. 連絡先は userRights.contact に統合（base.contactEmail は削除）
 // ============================================================
 
 // ------------------------------------------------------------
@@ -43,7 +44,6 @@ export function buildPolicyHTML(data) {
     ? escapeHTML(base.representative)
     : "";
   const address = base.address ? escapeHTML(base.address) : "";
-  const email = withPlaceholder(base.contactEmail, "メールアドレス未設定");
   const date = withPlaceholder(data.legal?.effectiveDate, "施行日未設定");
 
   // ------------------------------------------------------------
@@ -186,7 +186,7 @@ export function buildPolicyHTML(data) {
   </section>`;
 
   // ------------------------------------------------------------
-  // 開示・訂正・削除等の請求について
+  // お問い合わせ・開示・訂正・削除等の請求について（統合版）
   // ------------------------------------------------------------
   let contactOutput = "";
   if (userRights.contact || userRights.phone) {
@@ -197,6 +197,10 @@ export function buildPolicyHTML(data) {
   } else {
     contactOutput = withPlaceholder("", "連絡先未設定（メールまたは電話番号のいずれかを入力）");
   }
+
+  const procedureText = userRights.procedure
+    ? `<br>${escapeHTML(userRights.procedure)}`
+    : "";
 
   // ------------------------------------------------------------
   // HTML全体組み立て
@@ -220,11 +224,12 @@ export function buildPolicyHTML(data) {
   ${sectionSecurity}
 
   <section class="uk-section-xsmall">
-    <h3 class="uk-heading-bullet">開示・訂正・削除等の請求について</h3>
+    <h3 class="uk-heading-bullet">お問い合わせ・開示等の請求について</h3>
     <p>
-      利用者ご本人からの開示・訂正・削除等のご請求には、適切かつ迅速に対応いたします。<br>
+      本プライバシーポリシーに関するお問い合わせ、および利用者ご本人からの開示・訂正・削除等のご請求には、適切かつ迅速に対応いたします。<br>
       ご連絡は以下の方法でお願いいたします：<br>
       ${contactOutput}
+      ${procedureText}
     </p>
   </section>
 

@@ -41,11 +41,6 @@
       </div>
 
       <div class="uk-margin">
-        <label class="uk-form-label">お問い合わせメール <span class="required-label">※必須</span></label>
-        <input class="uk-input" type="email" name="base.contactEmail" placeholder="info@sample-desu.co.jp" required>
-      </div>
-
-      <div class="uk-margin">
         <label class="uk-form-label">住所</label>
         <textarea class="uk-textarea" name="base.address" rows="2" placeholder="東京都港区赤坂1-1-1"></textarea>
       </div>
@@ -163,19 +158,22 @@
 
       <hr>
 
-      <!-- 開示等の請求 -->
-      <h3 class="uk-heading-bullet"><span uk-icon="mail"></span> 開示等の請求</h3>
-      <p class="uk-text-meta">開示・訂正・削除などの請求連絡先を入力してください。</p>
+      <!-- お問い合わせ・開示等の請求 -->
+      <h3 class="uk-heading-bullet"><span uk-icon="mail"></span> お問い合わせ・開示等の請求</h3>
+      <p class="uk-text-meta">プライバシーポリシーに関するお問い合わせ、および開示・訂正・削除などの請求連絡先を入力してください。</p>
 
       <div class="uk-margin">
-        <input class="uk-input" name="userRights.contact" placeholder="info@sample-desu.co.jp">
+        <label class="uk-form-label">メールアドレス <span class="required-label">※必須</span></label>
+        <input class="uk-input" type="email" name="userRights.contact" placeholder="privacy@sample-desu.co.jp" required>
       </div>
 
       <div class="uk-margin">
+        <label class="uk-form-label">電話番号</label>
         <input class="uk-input" name="userRights.phone" placeholder="03-0000-0000">
       </div>
 
       <div class="uk-margin">
+        <label class="uk-form-label">対応手順</label>
         <textarea class="uk-textarea" name="userRights.procedure" rows="2" placeholder="本人確認の上、速やかに対応いたします（通常1週間以内）。"></textarea>
       </div>
 
