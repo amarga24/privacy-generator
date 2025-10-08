@@ -1,45 +1,40 @@
-﻿// ============================================================
+﻿﻿// ============================================================
 // api/policy-template.js
 // ------------------------------------------------------------
 // 概要: 入力データ（フォーム内容）を受け取り、
 //       プライバシーポリシーHTML本文を生成する。
-// 特徴: 未入力の項目に「（※要修正※）」を自動表示し、
-//       UIkitの uk-alert-danger で赤背景警告を出す。
-//       各セクションで「該当なし」チェック時は出力を省略。
-// 注意: 入力データは保存せず、レスポンス生成後に破棄。
+// 特徴: 「該当なし」未チェック時はプレースホルダーを出力。
+//       未入力時は <span class="uk-text-danger">（※要修正※）</span> を先頭に追加。
+//       <div class="uk-alert-danger"> は廃止。
 // ============================================================
 
-function cleanInput(value, placeholder) {
-  if (!value || String(value).trim() === "") {
-    return `<div class="uk-alert-danger" uk-alert>（※要修正※）${placeholder}</div>`;
-  }
-  return String(value)
+// 赤字付きプレースホルダー出力ヘルパー
+function withPlaceholder(val, placeholder) {
+  if (val && String(val).trim() !== "") return String(val).trim();
+  return `<span class="uk-text-danger">（※要修正※）</span>${placeholder}`;
+}
+
+// HTMLエスケープ（必要最小限）
+function escapeHTML(value) {
+  return String(value || "")
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")
     .replace(/>/g, "&gt;");
 }
 
-/**
- * ------------------------------------------------------------
- * buildPolicyHTML()
- * ------------------------------------------------------------
- * フォーム入力データをもとに、UIkit準拠のプライバシーポリシーHTMLを生成。
- * - uk-heading-bullet：見出しデザイン
- * - uk-alert-danger：未入力警告
- * - 「該当なし」チェック時はセクション非出力。
- * - メールまたは電話番号が空の場合も警告を出す。
- * ------------------------------------------------------------
- */
+// ============================================================
+// buildPolicyHTML()
+// ============================================================
 export function buildPolicyHTML(data) {
   const base = data.base || {};
   const userRights = data.userRights || {};
 
-  const site = cleanInput(base.siteName, "サイト名未設定");
-  const operator = cleanInput(base.operatorName, "運営者名未設定");
-  const email = cleanInput(base.contactEmail, "メールアドレス未設定");
-  const date = cleanInput(data.legal?.effectiveDate, "施行日未設定");
+  const site = withPlaceholder(base.siteName, "サイト名未設定");
+  const operator = withPlaceholder(base.operatorName, "運営者名未設定");
+  const email = withPlaceholder(base.contactEmail, "メールアドレス未設定");
+  const date = withPlaceholder(data.legal?.effectiveDate, "施行日未設定");
 
-  // HTMLセクション変数
+  // 各セクション初期化
   let sectionCollection = "";
   let sectionPurposes = "";
   let sectionThird = "";
@@ -50,13 +45,6 @@ export function buildPolicyHTML(data) {
   // 個人情報の取得方法
   // ------------------------------------------------------------
   if (!data.collection?.noCollection) {
-    // 空欄時に赤字（uk-text-danger）＋例文を先頭に表示
-    const withPlaceholder = (val, placeholder) => {
-      if (val && String(val).trim() !== "") return String(val).trim();
-      return `<span class="uk-text-danger">（※要修正※）${placeholder}</span>`;
-    };
-
-    // 各項目の整形
     const methods = withPlaceholder(
       (data.collection.methods || []).join("、"),
       "ユーザー入力による取得（例：お問い合わせフォーム、会員登録など）"
@@ -72,14 +60,13 @@ export function buildPolicyHTML(data) {
       "補足説明（例：これらの情報はサービス提供や不正防止のために利用）"
     );
 
-    // 出力（見出しはそのまま）
     sectionCollection = `
-  <section class="uk-section-xsmall">
-    <h3 class="uk-heading-bullet">個人情報の取得方法</h3>
-    <p><strong>ユーザー入力による取得：</strong><br>${methods}</p>
-    <p><strong>自動取得される情報：</strong><br>${auto}</p>
-    <p><strong>補足説明：</strong><br>${detail}</p>
-  </section>`;
+    <section class="uk-section-xsmall">
+      <h3 class="uk-heading-bullet">個人情報の取得方法</h3>
+      <p><strong>ユーザー入力による取得：</strong><br>${methods}</p>
+      <p><strong>自動取得される情報：</strong><br>${auto}</p>
+      <p><strong>補足説明：</strong><br>${detail}</p>
+    </section>`;
   }
 
   // ------------------------------------------------------------
@@ -87,15 +74,15 @@ export function buildPolicyHTML(data) {
   // ------------------------------------------------------------
   if (!data.purposesFlag) {
     const purposes = (data.purposes || []).map((p) => {
-      const cat = p.category || "";
-      const tgt = p.target || "";
-      const desc = p.description || "";
-      return `<li>${cat}${tgt ? `（${tgt}）` : ""}：${desc}</li>`;
+      const cat = withPlaceholder(p.category, "カテゴリ未入力");
+      const tgt = p.target ? `（${escapeHTML(p.target)}）` : "";
+      const desc = withPlaceholder(p.description, "説明未入力");
+      return `<li>${cat}${tgt}：${desc}</li>`;
     });
 
     const content = purposes.length
       ? `<ul>${purposes.join("")}</ul>`
-      : `<div class="uk-alert-danger" uk-alert>（※要修正※）利用目的未入力</div>`;
+      : `<p><span class="uk-text-danger">（※要修正※）</span>利用目的未入力</p>`;
 
     sectionPurposes = `
     <section class="uk-section-xsmall">
@@ -109,7 +96,10 @@ export function buildPolicyHTML(data) {
   // 第三者提供・委託
   // ------------------------------------------------------------
   if (!data.thirdParties?.noThirdparty) {
-    const detail = cleanInput(data.thirdParties.detail, "委託・提供に関する説明未入力");
+    const detail = withPlaceholder(
+      data.thirdParties.detail,
+      "委託・提供に関する説明未入力"
+    );
     const examples = (data.thirdParties.entrustExamples || []).join("、");
 
     sectionThird = `
@@ -118,7 +108,7 @@ export function buildPolicyHTML(data) {
       <p>
         当サイトでは、法令に基づく場合を除き、第三者への個人情報の提供は行いません。<br>
         ${detail}
-        ${examples ? `<br>主な委託先の例：${examples}` : ""}
+        ${examples ? `<br>主な委託先の例：${escapeHTML(examples)}` : ""}
       </p>
     </section>`;
   }
@@ -128,16 +118,20 @@ export function buildPolicyHTML(data) {
   // ------------------------------------------------------------
   if (!data.analytics?.noAnalytics) {
     const tools = (data.analytics.tools || []).map((t) => {
-      const name = cleanInput(t.name, "ツール名未入力");
-      const provider = t.provider ? `（提供者：${t.provider}）` : "";
-      const purpose = t.purpose || "目的未記入";
-      const optout = t.optoutUrl ? `<br>オプトアウトURL：<a href="${t.optoutUrl}" target="_blank">${t.optoutUrl}</a>` : "";
+      const name = withPlaceholder(t.name, "ツール名未入力");
+      const provider = t.provider ? `（提供者：${escapeHTML(t.provider)}）` : "";
+      const purpose = withPlaceholder(t.purpose, "目的未入力");
+      const optout = t.optoutUrl
+        ? `<br>オプトアウトURL：<a href="${escapeHTML(t.optoutUrl)}" target="_blank">${escapeHTML(
+            t.optoutUrl
+          )}</a>`
+        : "";
       return `<li>${name}${provider}：${purpose}${optout}</li>`;
     });
 
     const content = tools.length
       ? `<ul>${tools.join("")}</ul>`
-      : `<div class="uk-alert-danger" uk-alert>（※要修正※）解析ツール未入力</div>`;
+      : `<p><span class="uk-text-danger">（※要修正※）</span>解析ツール未入力</p>`;
 
     sectionAnalytics = `
     <section class="uk-section-xsmall">
@@ -151,8 +145,14 @@ export function buildPolicyHTML(data) {
   // Cookie
   // ------------------------------------------------------------
   if (!data.cookies?.noCookies) {
-    const purposes = (data.cookies.purposes || []).join("、") || "（※要修正※）Cookie使用目的未入力";
-    const disable = cleanInput(data.cookies.disableMethod, "無効化方法未入力");
+    const purposes = withPlaceholder(
+      (data.cookies.purposes || []).join("、"),
+      "Cookie使用目的未入力（例：利便性向上、アクセス解析、広告配信など）"
+    );
+    const disable = withPlaceholder(
+      data.cookies.disableMethod,
+      "無効化方法未入力（例：ブラウザ設定からCookieを無効化できます）"
+    );
 
     sectionCookies = `
     <section class="uk-section-xsmall">
@@ -170,11 +170,11 @@ export function buildPolicyHTML(data) {
   let contactOutput = "";
   if (userRights.contact || userRights.phone) {
     contactOutput = `
-      ${userRights.contact ? `メール：<a href="mailto:${userRights.contact}" class="uk-link-text">${userRights.contact}</a><br>` : ""}
-      ${userRights.phone ? `電話：${userRights.phone}<br>` : ""}
+      ${userRights.contact ? `メール：<a href="mailto:${escapeHTML(userRights.contact)}" class="uk-link-text">${escapeHTML(userRights.contact)}</a><br>` : ""}
+      ${userRights.phone ? `電話：${escapeHTML(userRights.phone)}<br>` : ""}
     `;
   } else {
-    contactOutput = `<div class="uk-alert-danger" uk-alert>（※要修正※）連絡先未設定（メールまたは電話番号のいずれかを入力してください）</div>`;
+    contactOutput = `<p><span class="uk-text-danger">（※要修正※）</span>連絡先未設定（メールまたは電話番号のいずれかを入力してください）</p>`;
   }
 
   // ------------------------------------------------------------
