@@ -50,13 +50,13 @@ export function buildPolicyHTML(data) {
   // 個人情報の取得方法
   // ------------------------------------------------------------
   if (!data.collection?.noCollection) {
-    // 空欄時に赤警告＋例文を出す
+    // 空欄時に赤字（uk-text-danger）＋例文を先頭に表示
     const withPlaceholder = (val, placeholder) => {
       if (val && String(val).trim() !== "") return String(val).trim();
-      return `<div class="uk-alert-danger" uk-alert>（※要修正※）${placeholder}</div>`;
+      return `<span class="uk-text-danger">（※要修正※）${placeholder}</span>`;
     };
 
-    // 各項目を整形
+    // 各項目の整形
     const methods = withPlaceholder(
       (data.collection.methods || []).join("、"),
       "ユーザー入力による取得（例：お問い合わせフォーム、会員登録など）"
@@ -72,7 +72,7 @@ export function buildPolicyHTML(data) {
       "補足説明（例：これらの情報はサービス提供や不正防止のために利用）"
     );
 
-    // 出力（見出しは変更しない）
+    // 出力（見出しはそのまま）
     sectionCollection = `
   <section class="uk-section-xsmall">
     <h3 class="uk-heading-bullet">個人情報の取得方法</h3>
@@ -81,7 +81,6 @@ export function buildPolicyHTML(data) {
     <p><strong>補足説明：</strong><br>${detail}</p>
   </section>`;
   }
-
 
   // ------------------------------------------------------------
   // 利用目的
