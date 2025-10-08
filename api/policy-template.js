@@ -98,22 +98,27 @@ export function buildPolicyHTML(data) {
   // ============================================================
   let sectionThird = "";
   if (data.thirdParties?.noThirdparty !== true) {
+
+    // 第三者提供・委託に関する説明
     const detail = withPlaceholder(
       data.thirdParties?.detail,
       "第三者提供・委託に関する説明（例：法令に基づく場合を除き、第三者への提供および委託は行いません。）"
     );
 
-    const examples = (data.thirdParties?.entrustExamples || []).join("、");
+    // 委託先の例
+    const examples = withPlaceholder(
+      (data.thirdParties?.entrustExamples || []).join("、"),
+      "委託先の例（例：サーバー会社、決済代行業者など）"
+    );
 
     sectionThird = `
   <section class="uk-section-xsmall">
     <h3 class="uk-heading-bullet">個人情報の第三者提供および委託</h3>
-    <p>
-      ${detail}<br>
-      ${examples ? `主な委託先の例：${escapeHTML(examples)}` : ""}
-    </p>
+    <p>第三者提供・委託に関する説明：<br>${detail}</p>
+    <p>委託先の例：<br>${examples}</p>
   </section>`;
   }
+
 
 
   // ============================================================
