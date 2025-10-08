@@ -53,7 +53,7 @@
         <p class="uk-text-meta">問い合わせフォーム等を使用しない場合は「該当なし」をチェックしてください。</p>
 
         <div class="uk-margin-small">
-          <label><input class="uk-checkbox" type="checkbox" name="collection.noCollection"> 該当なし</label>
+          <label><input class="uk-checkbox" type="checkbox" name="collection.noCollection" checked> 該当なし</label>
         </div>
 
         <div class="uk-margin">
@@ -77,10 +77,10 @@
       <!-- 利用目的 -->
       <section id="purposesSection">
         <h3 class="uk-heading-bullet"><span uk-icon="list"></span> 利用目的</h3>
-        <p class="uk-text-meta">利用目的が存在しない場合は「該当なし」をチェックしてください。</p>
+        <p class="uk-text-meta">個人情報を取得しない場合、または利用目的が存在しない場合は「該当なし」をチェックしてください。</p>
 
         <div class="uk-margin-small">
-          <label><input class="uk-checkbox" type="checkbox" name="purposes.noPurpose"> 該当なし</label>
+          <label><input class="uk-checkbox" type="checkbox" name="purposes.noPurpose" checked> 該当なし</label>
         </div>
 
         <p class="uk-text-meta">例：株式会社サンプルは、お客様情報を商品発送およびお問い合わせ対応のために利用します。</p>
@@ -96,7 +96,7 @@
         <p class="uk-text-meta">提供や委託がない場合は「該当なし」をチェックしてください。</p>
 
         <div class="uk-margin-small">
-          <label><input class="uk-checkbox" type="checkbox" name="thirdParties.noThirdparty"> 該当なし</label>
+          <label><input class="uk-checkbox" type="checkbox" name="thirdParties.noThirdparty" checked> 該当なし</label>
         </div>
 
         <div class="uk-margin">
@@ -118,7 +118,7 @@
         <p class="uk-text-meta">アクセス解析を使用しない場合は「該当なし」をチェックしてください。</p>
 
         <div class="uk-margin-small">
-          <label><input class="uk-checkbox" type="checkbox" name="analytics.noAnalytics"> 該当なし</label>
+          <label><input class="uk-checkbox" type="checkbox" name="analytics.noAnalytics" checked> 該当なし</label>
         </div>
 
         <div id="analyticsWrap"></div>
@@ -133,7 +133,7 @@
         <p class="uk-text-meta">Cookieを使用しない場合は「該当なし」をチェックしてください。</p>
 
         <div class="uk-margin-small">
-          <label><input class="uk-checkbox" type="checkbox" name="cookies.noCookies"> 該当なし</label>
+          <label><input class="uk-checkbox" type="checkbox" name="cookies.noCookies" checked> 該当なし</label>
         </div>
 
         <div class="uk-margin">
@@ -151,9 +151,9 @@
 
       <!-- 管理体制 -->
       <h3 class="uk-heading-bullet"><span uk-icon="bell"></span> 管理体制</h3>
-      <p class="uk-text-meta">個人情報保護のために講じている対策を入力してください。</p>
+      <p class="uk-text-meta">個人情報保護のために講じている対策を入力してください。空欄の場合は標準的な文言が自動で設定されます。</p>
       <div class="uk-margin">
-        <input class="uk-input" name="security.measures" placeholder="SSL/TLS通信暗号化, アクセス制御, 定期的な見直し">
+        <input class="uk-input" name="security.measures" placeholder="適切なアクセス制御, 定期的な見直し" value="適切なアクセス制御, 定期的な見直し">
       </div>
 
       <hr>
@@ -184,11 +184,13 @@
 
       <div class="uk-grid-small" uk-grid>
         <div class="uk-width-1-2@s">
-          <label class="uk-form-label">発効日</label>
-          <input class="uk-input" type="date" name="legal.effectiveDate">
+          <label class="uk-form-label">発効日 <span class="required-label">※必須</span></label>
+          <input class="uk-input" type="date" name="legal.effectiveDate" required>
         </div>
         <div class="uk-width-1-2@s">
-          <label><input class="uk-checkbox" type="checkbox" name="legal.governingLaw" value="日本法"> 日本法に基づく</label>
+          <label class="uk-form-label" style="line-height: 40px;">
+            <input class="uk-checkbox" type="checkbox" name="legal.governingLaw" value="日本法" checked> 日本法に基づく
+          </label>
         </div>
       </div>
 
