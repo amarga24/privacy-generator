@@ -7,9 +7,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/uikit@3.24.0/dist/css/uikit.min.css" />
   <style>
-    body { background: #f8f9fb; }
-    .required-label { color: #e60033; font-size: 0.8em; margin-left: 4px; }
-    ::placeholder { color: #999; }
+    body {
+      background: #f8f9fb;
+    }
+
+    .required-label {
+      color: #e60033;
+      font-size: 0.8em;
+      margin-left: 4px;
+    }
+
+    ::placeholder {
+      color: #999;
+    }
   </style>
 </head>
 
@@ -17,8 +27,8 @@
 
   <div class="uk-container uk-margin-large-bottom">
     <h1 class="uk-heading-line uk-margin-top"><span>Web Privacy Policy Generator</span></h1>
-    <p class="uk-text-small uk-text-muted">入力内容は保存されません。「生成する」を押すと下部にHTMLがプレビューされます。</p>
-
+    <p class="uk-text-small uk-text-muted">入力内容は保存されません。「生成する」を押すと下部にHTMLがプレビューされます。<br>※
+      未入力の項目には参考例が表示されます。実際の運用に合わせて修正してください。</p>
     <form id="policyForm" class="uk-margin-large-top uk-form-stacked uk-card uk-card-default uk-card-body uk-margin">
 
       <!-- 基本情報 -->
@@ -62,18 +72,22 @@
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">ユーザー入力による取得<span class="uk-margin-small-left uk-text-primary uk-text-small">例：お問い合わせフォーム, 会員登録フォーム</span></label>
+          <label class="uk-form-label">ユーザー入力による取得<span
+              class="uk-margin-small-left uk-text-primary uk-text-small">例：お問い合わせフォーム, 会員登録フォーム</span></label>
           <input class="uk-input" name="collection.methods" placeholder="お問い合わせフォーム, 会員登録フォーム">
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">自動取得される情報<span class="uk-margin-small-left uk-text-primary uk-text-small">例：アクセスログ, Cookie, IPアドレス</span></label>
+          <label class="uk-form-label">自動取得される情報<span
+              class="uk-margin-small-left uk-text-primary uk-text-small">例：アクセスログ, Cookie, IPアドレス</span></label>
           <input class="uk-input" name="collection.autoCollection" placeholder="アクセスログ, Cookie, IPアドレス">
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">補足説明<span class="uk-margin-small-left uk-text-primary uk-text-small">例：利用状況分析のためCookieを使用しています。</span></label>
-          <textarea class="uk-textarea" name="collection.detail" rows="2" placeholder="利用状況分析のためCookieを使用しています。"></textarea>
+          <label class="uk-form-label">補足説明<span
+              class="uk-margin-small-left uk-text-primary uk-text-small">例：利用状況分析のためCookieを使用しています。</span></label>
+          <textarea class="uk-textarea" name="collection.detail" rows="2"
+            placeholder="利用状況分析のためCookieを使用しています。"></textarea>
         </div>
       </section>
 
@@ -105,13 +119,17 @@
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">第三者提供・委託に関する説明<span class="uk-margin-small-left uk-text-primary uk-text-small">例：法令に基づく場合を除き、第三者への提供および委託は行う場合があります。</span></label>
-          <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者への提供および委託は行う場合があります。"></textarea>
+          <label class="uk-form-label">第三者提供・委託に関する説明<span
+              class="uk-margin-small-left uk-text-primary uk-text-small">例：法令に基づく場合を除き、第三者への提供および委託は行う場合があります。</span></label>
+          <textarea class="uk-textarea" name="thirdParties.detail" rows="2"
+            placeholder="法令に基づく場合を除き、第三者への提供および委託は行う場合があります。"></textarea>
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">委託先の例<span class="uk-margin-small-left uk-text-primary uk-text-small">例：さくらインターネット株式会社（サーバーホスティング）、GMOペイメントゲートウェイ株式会社（決済代行）、ヤマト運輸株式会社（配送業務）</span></label>
-          <input class="uk-input" name="thirdParties.entrustExamples" placeholder="さくらインターネット株式会社（サーバーホスティング）、GMOペイメントゲートウェイ株式会社（決済代行）、ヤマト運輸株式会社（配送業務）">
+          <label class="uk-form-label">委託先の例<span
+              class="uk-margin-small-left uk-text-primary uk-text-small">例：さくらインターネット株式会社（サーバーホスティング）、GMOペイメントゲートウェイ株式会社（決済代行）、ヤマト運輸株式会社（配送業務）</span></label>
+          <input class="uk-input" name="thirdParties.entrustExamples"
+            placeholder="さくらインターネット株式会社（サーバーホスティング）、GMOペイメントゲートウェイ株式会社（決済代行）、ヤマト運輸株式会社（配送業務）">
         </div>
       </section>
 
@@ -142,12 +160,14 @@
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">使用目的<span class="uk-margin-small-left uk-text-primary uk-text-small">例：利便性向上, アクセス解析, 広告配信</span></label>
+          <label class="uk-form-label">使用目的<span class="uk-margin-small-left uk-text-primary uk-text-small">例：利便性向上,
+              アクセス解析, 広告配信</span></label>
           <input class="uk-input" name="cookies.purposes" placeholder="利便性向上, アクセス解析, 広告配信">
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">無効化方法<span class="uk-margin-small-left uk-text-primary uk-text-small">例：ブラウザ設定からCookieを無効化できます。</span></label>
+          <label class="uk-form-label">無効化方法<span
+              class="uk-margin-small-left uk-text-primary uk-text-small">例：ブラウザ設定からCookieを無効化できます。</span></label>
           <input class="uk-input" name="cookies.disableMethod" placeholder="ブラウザ設定からCookieを無効化できます。">
         </div>
       </section>
@@ -174,7 +194,8 @@
 
       <div class="uk-margin">
         <label class="uk-form-label">対応手順</label>
-        <textarea class="uk-textarea" name="userRights.procedure" rows="2" placeholder="本人確認の上、速やかに対応いたします（通常1週間以内）。"></textarea>
+        <textarea class="uk-textarea" name="userRights.procedure" rows="2"
+          placeholder="本人確認の上、速やかに対応いたします（通常1週間以内）。"></textarea>
       </div>
 
       <hr>
@@ -183,11 +204,11 @@
       <h3 class="uk-heading-bullet"><span uk-icon="file-edit"></span> 法的情報</h3>
 
       <div class="uk-grid-small" uk-grid>
-        <div class="uk-width-1-2@s">
+        <div class="uk-width-1-4@s">
           <label class="uk-form-label">発効日 <span class="required-label">※必須</span></label>
           <input class="uk-input" type="date" name="legal.effectiveDate" required>
         </div>
-        <div class="uk-width-1-2@s">
+        <div class="uk-width-3-4@s">
           <label class="uk-form-label" style="line-height: 40px;">
             <input class="uk-checkbox" type="checkbox" name="legal.governingLaw" value="日本法" checked> 日本法に基づく
           </label>
@@ -213,4 +234,5 @@
   <script src="script.js" defer></script>
 
 </body>
+
 </html>
