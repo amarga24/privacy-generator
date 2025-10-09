@@ -175,4 +175,13 @@
     URL.revokeObjectURL(url);
   });
 
+  // ------------------------------------------------------------
+  // 発効日の初期値設定（今日の日付）
+  // ------------------------------------------------------------
+  const today = new Date().toISOString().split('T')[0];
+  const effectiveDateInput = $('[name="legal.effectiveDate"]');
+  if (effectiveDateInput && !effectiveDateInput.value) {
+    effectiveDateInput.value = today;
+  }
+
 })();
