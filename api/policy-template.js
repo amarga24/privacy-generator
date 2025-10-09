@@ -124,13 +124,13 @@ export function buildPolicyHTML(data) {
     const detailText = data.thirdParties?.detail || "";
     const detail = detailText.trim()
       ? escapeHTML(detailText)
-      : `<span class="uk-text-danger">（※要修正※）</span>第三者提供・委託に関する説明（例：法令に基づく場合を除き、第三者への提供および委託は行いません。）`;
+      : `<span class="uk-text-danger">（※要修正※）</span>第三者提供・委託に関する説明（例：法令に基づく場合を除き、第三者への提供および委託は行う場合があります。）`;
 
     const examplesArray = data.thirdParties?.entrustExamples || [];
     const examplesText = examplesArray.filter(e => e && e.trim()).join("、");
     const examples = examplesText
       ? escapeHTML(examplesText)
-      : `<span class="uk-text-danger">（※要修正※）</span>委託先の例（例：サーバー会社、決済代行業者など）`;
+      : `<span class="uk-text-danger">（※要修正※）</span>委託先の例（例：さくらインターネット株式会社（サーバーホスティング）、GMOペイメントゲートウェイ株式会社（決済代行）、ヤマト運輸株式会社（配送業務））`;
 
     sectionThird = `
   <section class="uk-section-xsmall">
