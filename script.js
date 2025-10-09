@@ -33,10 +33,10 @@
   const addAnalyticsRow = () => {
     analyticsWrap.appendChild(createEl(`
       <div class="uk-grid-small uk-margin-small" uk-grid>
-        <div class="uk-width-1-4@m"><input class="uk-input" data-k="name" placeholder="ツール名"></div>
-        <div class="uk-width-1-4@m"><input class="uk-input" data-k="provider" placeholder="提供者"></div>
-        <div class="uk-width-1-4@m"><input class="uk-input" data-k="purpose" placeholder="目的"></div>
-        <div class="uk-width-1-4@m"><input class="uk-input" data-k="optoutUrl" placeholder="オプトアウトURL"></div>
+        <div class="uk-width-1-4@m"><input class="uk-input" data-k="name" placeholder="ツール名：Google Analytics"></div>
+        <div class="uk-width-1-4@m"><input class="uk-input" data-k="provider" placeholder="提供者名：Google LLC"></div>
+        <div class="uk-width-1-4@m"><input class="uk-input" data-k="purpose" placeholder="目的：アクセス状況の分析"></div>
+        <div class="uk-width-1-4@m"><input class="uk-input" data-k="optoutUrl" placeholder="URL：https://tools.google.com/dlpage/gaoptout"></div>
       </div>`));
   };
   $("#addAnalytics").addEventListener("click", addAnalyticsRow);
