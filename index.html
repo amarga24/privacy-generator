@@ -45,6 +45,11 @@
         <textarea class="uk-textarea" name="base.address" rows="2" placeholder="東京都港区赤坂1-1-1"></textarea>
       </div>
 
+      <div class="uk-margin">
+        <label class="uk-form-label">お問い合わせメール <span class="required-label">※必須</span></label>
+        <input class="uk-input" type="email" name="base.contactEmail" placeholder="info@sample-desu.co.jp" required>
+      </div>
+
       <hr>
 
       <!-- 個人情報の取得方法 -->
@@ -57,17 +62,17 @@
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">ユーザー入力による取得</label>
+          <label class="uk-form-label">ユーザー入力による取得<span class="uk-margin-small-left uk-text-primary uk-text-small">例：お問い合わせフォーム, 会員登録フォーム</span></label>
           <input class="uk-input" name="collection.methods" placeholder="お問い合わせフォーム, 会員登録フォーム">
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">自動取得される情報</label>
+          <label class="uk-form-label">自動取得される情報<span class="uk-margin-small-left uk-text-primary uk-text-small">例：アクセスログ, Cookie, IPアドレス</span></label>
           <input class="uk-input" name="collection.autoCollection" placeholder="アクセスログ, Cookie, IPアドレス">
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">補足説明</label>
+          <label class="uk-form-label">補足説明<span class="uk-margin-small-left uk-text-primary uk-text-small">例：利用状況分析のためCookieを使用しています。</span></label>
           <textarea class="uk-textarea" name="collection.detail" rows="2" placeholder="利用状況分析のためCookieを使用しています。"></textarea>
         </div>
       </section>
@@ -100,12 +105,12 @@
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">第三者提供・委託に関する説明</label>
+          <label class="uk-form-label">第三者提供・委託に関する説明<span class="uk-margin-small-left uk-text-primary uk-text-small">例：法令に基づく場合を除き、第三者への提供および委託は行いません。</span></label>
           <textarea class="uk-textarea" name="thirdParties.detail" rows="2" placeholder="法令に基づく場合を除き、第三者への提供および委託は行いません。"></textarea>
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">委託先の例</label>
+          <label class="uk-form-label">委託先の例<span class="uk-margin-small-left uk-text-primary uk-text-small">例：さくらインターネット株式会社（サーバーホスティング）, GMOペイメントゲートウェイ株式会社（決済代行）</span></label>
           <input class="uk-input" name="thirdParties.entrustExamples" placeholder="サーバー会社, 決済代行業者">
         </div>
       </section>
@@ -137,12 +142,12 @@
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">使用目的</label>
+          <label class="uk-form-label">使用目的<span class="uk-margin-small-left uk-text-primary uk-text-small">例：利便性向上, アクセス解析, 広告配信</span></label>
           <input class="uk-input" name="cookies.purposes" placeholder="利便性向上, アクセス解析, 広告配信">
         </div>
 
         <div class="uk-margin">
-          <label class="uk-form-label">無効化方法</label>
+          <label class="uk-form-label">無効化方法<span class="uk-margin-small-left uk-text-primary uk-text-small">例：ブラウザ設定からCookieを無効化できます。</span></label>
           <input class="uk-input" name="cookies.disableMethod" placeholder="ブラウザ設定からCookieを無効化できます。">
         </div>
       </section>
@@ -151,7 +156,7 @@
 
       <!-- 管理体制 -->
       <h3 class="uk-heading-bullet"><span uk-icon="bell"></span> 管理体制</h3>
-      <p class="uk-text-meta">個人情報保護のために講じている対策を入力してください。空欄の場合は標準的な文言が自動で設定されます。</p>
+      <p class="uk-text-meta">個人情報保護のために講じている対策を入力してください。未入力の場合、標準的なプレースホルダーが表示されます。</p>
       <div class="uk-margin">
         <input class="uk-input" name="security.measures" placeholder="適切なアクセス制御, 定期的な見直し">
       </div>
@@ -160,12 +165,7 @@
 
       <!-- お問い合わせ・開示等の請求 -->
       <h3 class="uk-heading-bullet"><span uk-icon="mail"></span> お問い合わせ・開示等の請求</h3>
-      <p class="uk-text-meta">プライバシーポリシーに関するお問い合わせ、および開示・訂正・削除などの請求連絡先を入力してください。</p>
-
-      <div class="uk-margin">
-        <label class="uk-form-label">メールアドレス <span class="required-label">※必須</span></label>
-        <input class="uk-input" type="email" name="userRights.contact" placeholder="privacy@sample-desu.co.jp" required>
-      </div>
+      <p class="uk-text-meta">開示・訂正・削除などの請求に関する追加情報を入力してください。お問い合わせ先は基本情報のメールアドレスが使用されます。</p>
 
       <div class="uk-margin">
         <label class="uk-form-label">電話番号</label>

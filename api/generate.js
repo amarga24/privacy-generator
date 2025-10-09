@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     }
 
     // -----------------------------------------
-    // 再帰的にデータをクリーン化
+    // 再帰的にデータをクリーン化（boolean を保持）
     // -----------------------------------------
     function sanitizeValue(value) {
       if (Array.isArray(value)) {
@@ -42,12 +42,23 @@ export default async function handler(req, res) {
         }
         return cleaned;
       }
+      if (typeof value === "boolean") return value; // boolean はそのまま
       if (typeof value === "string") return value.trim();
       if (value == null || value === undefined) return "";
       return String(value);
     }
 
     const sanitizedData = sanitizeValue(data);
+
+    // -----------------------------------------
+    // デバッグ: 受信データを確認
+    // -----------------------------------------
+    console.log("=== api/generate.js で受信したデータ ===");
+    console.log("collection.noCollection:", sanitizedData.collection?.noCollection);
+    console.log("purposesFlag:", sanitizedData.purposesFlag);
+    console.log("thirdParties.noThirdparty:", sanitizedData.thirdParties?.noThirdparty);
+    console.log("analytics.noAnalytics:", sanitizedData.analytics?.noAnalytics);
+    console.log("cookies.noCookies:", sanitizedData.cookies?.noCookies);
 
     // -----------------------------------------
     // HTML生成
