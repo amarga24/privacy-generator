@@ -89,31 +89,27 @@ export function buildPolicyHTML(data) {
   // ------------------------------------------------------------
   // 個人情報の利用目的
   // ------------------------------------------------------------
+  // ------------------------------------------------------------
+  // 個人情報の利用目的
+  // ------------------------------------------------------------
   let sectionPurposes = "";
   if (data.purposesFlag !== true) {
     const purposes = (data.purposes || [])
-      .filter(p => p.category || p.target || p.description)
+      .filter(p => p.description && p.description.trim())
       .map((p) => {
-        const cat = p.category && p.category.trim()
-          ? escapeHTML(p.category)
-          : `<span class="uk-text-danger">（※要修正※）</span>カテゴリ未入力`;
-        const tgt = p.target && p.target.trim() ? `（${escapeHTML(p.target)}）` : "";
-        const desc = p.description && p.description.trim()
-          ? escapeHTML(p.description)
-          : `<span class="uk-text-danger">（※要修正※）</span>説明未入力`;
-        return `<li>${cat}${tgt}：${desc}</li>`;
+        return `<li>${escapeHTML(p.description)}</li>`;
       });
 
     const content = purposes.length
       ? `<ul>${purposes.join("")}</ul>`
-      : `<p><span class="uk-text-danger">（※要修正※）</span>利用目的未入力</p>`;
+      : `<p><span class="uk-text-danger">（※要修正※）</span>利用目的未入力（例：お客様からのお問い合わせに回答するため）</p>`;
 
     sectionPurposes = `
-    <section class="uk-section-xsmall">
-      <h3 class="uk-heading-bullet">個人情報の利用目的</h3>
-      <p>当サイトが取得した個人情報は、以下の目的のために利用いたします。</p>
-      ${content}
-    </section>`;
+  <section class="uk-section-xsmall">
+    <h3 class="uk-heading-bullet">個人情報の利用目的</h3>
+    <p>当サイトが取得した個人情報は、以下の目的のために利用いたします。</p>
+    ${content}
+  </section>`;
   }
 
   // ------------------------------------------------------------
