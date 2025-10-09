@@ -19,10 +19,8 @@
   const purposesWrap = $("#purposesWrap");
   const addPurposeRow = () => {
     purposesWrap.appendChild(createEl(`
-      <div class="uk-grid-small uk-margin-small" uk-grid>
-        <div class="uk-width-1-3@s"><input class="uk-input" data-k="category" placeholder="カテゴリ"></div>
-        <div class="uk-width-1-3@s"><input class="uk-input" data-k="target" placeholder="対象"></div>
-        <div class="uk-width-1-3@s"><input class="uk-input" data-k="description" placeholder="説明"></div>
+      <div class="uk-margin-small">
+        <input class="uk-input" data-k="purpose" placeholder="お客様からのお問い合わせに回答するため">
       </div>`));
   };
   $("#addPurpose").addEventListener("click", addPurposeRow);
@@ -59,12 +57,18 @@
     const cb = $(`[name="${p.check}"]`);
     const section = document.getElementById(p.sectionId);
     if (cb && section) {
-      cb.addEventListener("change", () => {
+      const updateFields = () => {
         section.querySelectorAll("input, textarea, select, button").forEach(el => {
           if (el === cb) return;
           el.disabled = cb.checked;
         });
-      });
+      };
+
+      // ページ読み込み時に実行
+      updateFields();
+
+      // チェック変更時にも実行
+      cb.addEventListener("change", updateFields);
     }
   });
 
@@ -77,11 +81,10 @@
   const toList = (s) => (s || "").split(",").map(x => x.trim()).filter(Boolean);
 
   const formToJSON = (form) => {
-    const pv = [...purposesWrap.querySelectorAll(".uk-grid-small")].map(r => ({
-      category: getInputValue(r.querySelector(`[data-k="category"]`)),
-      target: getInputValue(r.querySelector(`[data-k="target"]`)),
-      description: getInputValue(r.querySelector(`[data-k="description"]`))
-    })).filter(p => p.category || p.target || p.description);
+    const pv = [...purposesWrap.querySelectorAll(".uk-margin-small")].map(r => {
+      const purpose = getInputValue(r.querySelector(`[data-k="purpose"]`));
+      return purpose ? { description: purpose } : null;
+    }).filter(p => p !== null);
 
     const tools = [...analyticsWrap.querySelectorAll(".uk-grid-small")].map(r => ({
       name: getInputValue(r.querySelector(`[data-k="name"]`)),
@@ -90,7 +93,7 @@
       optoutUrl: getInputValue(r.querySelector(`[data-k="optoutUrl"]`))
     })).filter(t => t.name);
 
-    const jsonData = {
+    return {
       base: {
         siteName: getVal(form, "base.siteName"),
         operatorName: getVal(form, "base.operatorName"),
@@ -132,13 +135,6 @@
         governingLaw: getVal(form, "legal.governingLaw")
       }
     };
-
-    // デバッグ用：JSONデータをコンソールに出力
-    console.log("=== 送信するJSONデータ ===");
-    console.log(JSON.stringify(jsonData, null, 2));
-    console.log("base.contactEmail:", jsonData.base.contactEmail);
-
-    return jsonData;
   };
 
   // ------------------------------------------------------------
@@ -159,9 +155,6 @@
       });
 
       const html = await res.text();
-      console.log("=== 受信したHTML（最初の500文字） ===");
-      console.log(html.substring(0, 500));
-      
       preview.innerHTML = html;
       dlBtn.disabled = false;
     } catch (err) {
