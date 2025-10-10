@@ -8,5 +8,6 @@ npm-debug.log
 .DS_Store
 
 # Local-only files（ローカル開発専用ファイル）
+doc/
 server-local.js
 api/policy-template-local.js
